@@ -91,7 +91,7 @@ namespace MemoryManagement.Services
                     if (memory != null)
                     {
                         memory.Files = await _dbContext.MemoryFiles.Where(x => x.MemoryId == id && !x.IsDeleted).ToListAsync();
-                        memory.Files.ForEach(x => x.FileResult = GetFileResult(x.FileId, token).Result);
+                        memory.Files.ForEach(x => x.File = GetFile(x.FileId, token).Result);
                         memory.Files.ForEach(x => x.FileName = GetFileName(x.FileId, token).Result);
 
                         memory.Comments = await _dbContext.MemoryComments.Where(x => x.MemoryId == id && !x.IsDeleted).ToListAsync();
@@ -162,8 +162,9 @@ namespace MemoryManagement.Services
                     });
 
                     var pagination = PagedList<Memory>.ToPagedList(queryable, pagingParameter.PageNumber, pagingParameter.PageSize);
-                    pagination.ForEach(x => x.Files.ForEach(y => y.FileResult = GetFileResult(y.FileId, token).Result));
+                    pagination.ForEach(x => x.Files.ForEach(y => y.File = GetFile(y.FileId, token).Result));
                     pagination.ForEach(x => x.UserName = GetUserName(x.UserId, token).Result);
+                    pagination.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId, token).Result);
                     pagination.ForEach(x => x.UserCityCountry = GetUserCityCountry(x.UserId, token).Result);
                     pagination.ForEach(x => x.Comments.ForEach(y => y.UserName = GetUserName(y.UserId, token).Result));
                     pagination.ForEach(x => x.Comments.ForEach(y => y.UserAvatar = GetUserAvatar(y.UserId, token).Result));
@@ -174,6 +175,7 @@ namespace MemoryManagement.Services
                     {
                         Items = pagination,
                         TotalCount = pagination.TotalCount,
+                        TotalPages = pagination.TotalPages
                     });
 
                     result.SetMessage("İşlem başarı ile gerçekleşti.");
@@ -467,7 +469,7 @@ namespace MemoryManagement.Services
             {
                 try
                 {
-                    var memoryLike = await _dbContext.MemoryLikes.Where(x => x.MemoryId == memoryId && x.UserId == userId).FirstOrDefaultAsync();
+                    var memoryLike = await _dbContext.MemoryLikes.Where(x => x.MemoryId == memoryId && x.UserId == userId && !x.IsDeleted).FirstOrDefaultAsync();
                     memoryLike.IsDeleted = true;
 
                     await _dbContext.SaveChangesAsync();
@@ -522,7 +524,7 @@ namespace MemoryManagement.Services
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api2/User/GetPrimaryUserAddressById" + id);
+            var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api/User/GetPrimaryUserAddressById" + id);
 
             if (response.IsSuccessStatusCode)
             {
@@ -554,12 +556,12 @@ namespace MemoryManagement.Services
             }
         }
 
-        private async Task<FileContentResult> GetUserAvatar(long id, string token)
+        private async Task<Model.File> GetUserAvatar(long id, string token)
         {
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api2/User/" + id);
+            var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api/User/" + id);
 
             if (response.IsSuccessStatusCode)
             {
@@ -572,7 +574,7 @@ namespace MemoryManagement.Services
                         Result<User> result = JsonConvert.DeserializeObject<Result<User>>(responseStr);
 
                         if (result.GetData().FileId.HasValue) {
-                            return await GetFileResult(result.GetData().FileId.Value, token);
+                            return await GetFile(result.GetData().FileId.Value, token);
                         }
                         else
                         {
@@ -602,7 +604,7 @@ namespace MemoryManagement.Services
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api2/User/" + id);
+            var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api/User/" + id);
 
             if (response.IsSuccessStatusCode)
             {
@@ -639,7 +641,7 @@ namespace MemoryManagement.Services
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api2/File/" + id);
+            var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api/File/" + id);
 
             if (response.IsSuccessStatusCode)
             {
@@ -679,13 +681,12 @@ namespace MemoryManagement.Services
             return null;
         }
 
-
-        private async Task<FileContentResult> GetFileResult(long id, string token)
+        private async Task<Model.File> GetFile(long id, string token)
         {
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api2/File/" + id);
+            var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api/File/" + id);
 
             if (response.IsSuccessStatusCode)
             {
@@ -699,8 +700,7 @@ namespace MemoryManagement.Services
 
                         if (result.GetData() != null)
                         {
-                            byte[] bytes = System.IO.File.ReadAllBytes(result.GetData().Path);
-                            return new FileContentResult(bytes, result.GetData().ContentType);
+                            return result.GetData();
                         }
                         else
                         {

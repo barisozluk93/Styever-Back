@@ -21,7 +21,7 @@ namespace FileManagement.Authorization
             var token = httpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(' ').Last();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api2/User/GetUserPermissions");
+            var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api/User/GetUserPermissions");
 
             if (response.IsSuccessStatusCode)
             {

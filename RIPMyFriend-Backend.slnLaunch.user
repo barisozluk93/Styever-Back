@@ -26,6 +26,11 @@
         "Path": "ArticleManagement\\ArticleManagement.csproj",
         "Action": "Start",
         "DebugTarget": "http"
+      },
+      {
+        "Path": "FAQManagement\\FAQManagement.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
       }
     ]
   }

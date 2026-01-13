@@ -24,7 +24,7 @@ namespace MemoryManagement.Entity
         public string? UserName { get; set; }
 
         [NotMapped]
-        public FileContentResult? UserAvatar { get; set; }
+        public Model.File? UserAvatar { get; set; }
 
     }
 }

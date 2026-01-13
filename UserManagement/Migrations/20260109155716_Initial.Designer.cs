@@ -12,8 +12,8 @@ using UserManagement.DbContexts;
 namespace UserManagement.Migrations
 {
     [DbContext(typeof(UserManagementContext))]
-    [Migration("20251119104622_Inital")]
-    partial class Inital
+    [Migration("20260109155716_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -476,9 +476,9 @@ namespace UserManagement.Migrations
                         new
                         {
                             Id = 1L,
-                            CreatedDate = new DateTime(2025, 11, 19, 10, 46, 22, 301, DateTimeKind.Utc).AddTicks(4892),
+                            CreatedDate = new DateTime(2026, 1, 9, 15, 57, 15, 744, DateTimeKind.Utc).AddTicks(3712),
                             Email = "super@test.com",
-                            ExpirationDate = new DateTime(2026, 11, 19, 10, 46, 22, 301, DateTimeKind.Utc).AddTicks(4901),
+                            ExpirationDate = new DateTime(2027, 1, 9, 15, 57, 15, 744, DateTimeKind.Utc).AddTicks(3721),
                             IsDeleted = false,
                             IsSystemData = true,
                             IsTrial = false,
@@ -487,15 +487,16 @@ namespace UserManagement.Migrations
                             Phone = "+905077352772",
                             Salt = new byte[] { 3, 251, 182, 108, 1, 165, 5, 95, 117, 7, 42, 45, 196, 160, 190, 194, 65, 169, 48, 49, 99, 22, 120, 177, 165, 246, 57, 186, 94, 216, 59, 80, 48, 229, 210, 31, 5, 173, 219, 134, 83, 73, 90, 196, 220, 216, 163, 14, 219, 106, 52, 183, 13, 250, 15, 143, 154, 208, 85, 45, 29, 52, 13, 105 },
                             Surname = "SuperAdmin",
-                            TrialExpirationDate = new DateTime(2025, 11, 26, 10, 46, 22, 301, DateTimeKind.Utc).AddTicks(4894),
+                            TrialExpirationDate = new DateTime(2026, 1, 16, 15, 57, 15, 744, DateTimeKind.Utc).AddTicks(3715),
                             Username = "superadmin"
                         },
                         new
                         {
                             Id = 2L,
-                            CreatedDate = new DateTime(2025, 11, 19, 10, 46, 22, 301, DateTimeKind.Utc).AddTicks(4934),
+                            CreatedDate = new DateTime(2026, 1, 9, 15, 57, 15, 744, DateTimeKind.Utc).AddTicks(3753),
                             Email = "standart@test.com",
-                            ExpirationDate = new DateTime(2026, 11, 19, 10, 46, 22, 301, DateTimeKind.Utc).AddTicks(4934),
+                            ExpirationDate = new DateTime(2027, 1, 9, 15, 57, 15, 744, DateTimeKind.Utc).AddTicks(3754),
+                            FileId = 1L,
                             IsDeleted = false,
                             IsSystemData = true,
                             IsTrial = false,
@@ -504,15 +505,16 @@ namespace UserManagement.Migrations
                             Phone = "+905077352772",
                             Salt = new byte[] { 3, 251, 182, 108, 1, 165, 5, 95, 117, 7, 42, 45, 196, 160, 190, 194, 65, 169, 48, 49, 99, 22, 120, 177, 165, 246, 57, 186, 94, 216, 59, 80, 48, 229, 210, 31, 5, 173, 219, 134, 83, 73, 90, 196, 220, 216, 163, 14, 219, 106, 52, 183, 13, 250, 15, 143, 154, 208, 85, 45, 29, 52, 13, 105 },
                             Surname = "User",
-                            TrialExpirationDate = new DateTime(2025, 11, 26, 10, 46, 22, 301, DateTimeKind.Utc).AddTicks(4934),
+                            TrialExpirationDate = new DateTime(2026, 1, 16, 15, 57, 15, 744, DateTimeKind.Utc).AddTicks(3753),
                             Username = "standart user"
                         },
                         new
                         {
                             Id = 3L,
-                            CreatedDate = new DateTime(2025, 11, 19, 10, 46, 22, 301, DateTimeKind.Utc).AddTicks(4938),
+                            CreatedDate = new DateTime(2026, 1, 9, 15, 57, 15, 744, DateTimeKind.Utc).AddTicks(3760),
                             Email = "premium@test.com",
-                            ExpirationDate = new DateTime(2026, 11, 19, 10, 46, 22, 301, DateTimeKind.Utc).AddTicks(4939),
+                            ExpirationDate = new DateTime(2027, 1, 9, 15, 57, 15, 744, DateTimeKind.Utc).AddTicks(3761),
+                            FileId = 2L,
                             IsDeleted = false,
                             IsSystemData = true,
                             IsTrial = false,
@@ -521,15 +523,16 @@ namespace UserManagement.Migrations
                             Phone = "+905077352772",
                             Salt = new byte[] { 3, 251, 182, 108, 1, 165, 5, 95, 117, 7, 42, 45, 196, 160, 190, 194, 65, 169, 48, 49, 99, 22, 120, 177, 165, 246, 57, 186, 94, 216, 59, 80, 48, 229, 210, 31, 5, 173, 219, 134, 83, 73, 90, 196, 220, 216, 163, 14, 219, 106, 52, 183, 13, 250, 15, 143, 154, 208, 85, 45, 29, 52, 13, 105 },
                             Surname = "User",
-                            TrialExpirationDate = new DateTime(2025, 11, 26, 10, 46, 22, 301, DateTimeKind.Utc).AddTicks(4939),
+                            TrialExpirationDate = new DateTime(2026, 1, 16, 15, 57, 15, 744, DateTimeKind.Utc).AddTicks(3760),
                             Username = "premium user"
                         },
                         new
                         {
                             Id = 4L,
-                            CreatedDate = new DateTime(2025, 11, 19, 10, 46, 22, 301, DateTimeKind.Utc).AddTicks(4943),
+                            CreatedDate = new DateTime(2026, 1, 9, 15, 57, 15, 744, DateTimeKind.Utc).AddTicks(3764),
                             Email = "ultra@test.com",
-                            ExpirationDate = new DateTime(2026, 11, 19, 10, 46, 22, 301, DateTimeKind.Utc).AddTicks(4944),
+                            ExpirationDate = new DateTime(2027, 1, 9, 15, 57, 15, 744, DateTimeKind.Utc).AddTicks(3765),
+                            FileId = 3L,
                             IsDeleted = false,
                             IsSystemData = true,
                             IsTrial = false,
@@ -538,7 +541,7 @@ namespace UserManagement.Migrations
                             Phone = "+905077352772",
                             Salt = new byte[] { 3, 251, 182, 108, 1, 165, 5, 95, 117, 7, 42, 45, 196, 160, 190, 194, 65, 169, 48, 49, 99, 22, 120, 177, 165, 246, 57, 186, 94, 216, 59, 80, 48, 229, 210, 31, 5, 173, 219, 134, 83, 73, 90, 196, 220, 216, 163, 14, 219, 106, 52, 183, 13, 250, 15, 143, 154, 208, 85, 45, 29, 52, 13, 105 },
                             Surname = "User",
-                            TrialExpirationDate = new DateTime(2025, 11, 26, 10, 46, 22, 301, DateTimeKind.Utc).AddTicks(4943),
+                            TrialExpirationDate = new DateTime(2026, 1, 16, 15, 57, 15, 744, DateTimeKind.Utc).AddTicks(3764),
                             Username = "ultra user"
                         });
                 });

@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FileManagement.Migrations
 {
     [DbContext(typeof(FileManagementContext))]
-    [Migration("20251119142431_Inital")]
-    partial class Inital
+    [Migration("20260109155829_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -66,8 +66,8 @@ namespace FileManagement.Migrations
                             Extension = ".jpeg",
                             IsDeleted = false,
                             Length = 52501m,
-                            Name = "Queenie",
-                            Path = "C:\\Users\\Asus\\Desktop\\RIPMyFriend-Backend\\FileManagement\\Uploads/Memories\\Queenie.jpeg"
+                            Name = "68a1a7ccdfe3241d0aa9f9ae_REF23",
+                            Path = "C:/inetpub/api/FileManagement\\Uploads/Avatars\\68a1a7ccdfe3241d0aa9f9ae_REF23"
                         },
                         new
                         {
@@ -75,9 +75,9 @@ namespace FileManagement.Migrations
                             ContentType = "image/jpeg",
                             Extension = ".jpeg",
                             IsDeleted = false,
-                            Length = 12481m,
-                            Name = "Ringo",
-                            Path = "C:\\Users\\Asus\\Desktop\\RIPMyFriend-Backend\\FileManagement\\Uploads/Memories\\Ringo.jpeg"
+                            Length = 52501m,
+                            Name = "68a1a7ccdfe3241d0aa9f9ae_REF28",
+                            Path = "C:/inetpub/api/FileManagement\\Uploads/Avatars\\68a1a7ccdfe3241d0aa9f9ae_REF28"
                         },
                         new
                         {
@@ -85,39 +85,9 @@ namespace FileManagement.Migrations
                             ContentType = "image/jpeg",
                             Extension = ".jpeg",
                             IsDeleted = false,
-                            Length = 118784m,
-                            Name = "Bubbles",
-                            Path = "C:\\Users\\Asus\\Desktop\\RIPMyFriend-Backend\\FileManagement\\Uploads/Memories\\Bubbles.jpeg"
-                        },
-                        new
-                        {
-                            Id = 4L,
-                            ContentType = "image/jpeg",
-                            Extension = ".jpeg",
-                            IsDeleted = false,
-                            Length = 276500m,
-                            Name = "George",
-                            Path = "C:\\Users\\Asus\\Desktop\\RIPMyFriend-Backend\\FileManagement\\Uploads/Memories\\George.jpeg"
-                        },
-                        new
-                        {
-                            Id = 5L,
-                            ContentType = "image/jpeg",
-                            Extension = ".jpeg",
-                            IsDeleted = false,
-                            Length = 542177m,
-                            Name = "George(1)",
-                            Path = "C:\\Users\\Asus\\Desktop\\RIPMyFriend-Backend\\FileManagement\\Uploads/Memories\\George(1).jpeg"
-                        },
-                        new
-                        {
-                            Id = 6L,
-                            ContentType = "image/jpeg",
-                            Extension = ".jpeg",
-                            IsDeleted = false,
-                            Length = 270336m,
-                            Name = "George(2)",
-                            Path = "C:\\Users\\Asus\\Desktop\\RIPMyFriend-Backend\\FileManagement\\Uploads/Memories\\George(2).jpeg"
+                            Length = 52501m,
+                            Name = "68a1a7ccdfe3241d0aa9f9ae_REF29",
+                            Path = "C:/inetpub/api/FileManagement\\Uploads/Avatars\\68a1a7ccdfe3241d0aa9f9ae_REF29"
                         },
                         new
                         {
@@ -127,7 +97,7 @@ namespace FileManagement.Migrations
                             IsDeleted = false,
                             Length = 270336m,
                             Name = "68a1a7ccdfe3241d0aa9f9ae_REF22",
-                            Path = "C:\\Users\\Asus\\Desktop\\RIPMyFriend-Backend\\FileManagement\\Uploads/Articles\\68a1a7ccdfe3241d0aa9f9ae_REF22.jpg"
+                            Path = "C:/inetpub/api/FileManagement\\Uploads/Articles\\68a1a7ccdfe3241d0aa9f9ae_REF22.jpg"
                         },
                         new
                         {
@@ -137,7 +107,7 @@ namespace FileManagement.Migrations
                             IsDeleted = false,
                             Length = 270336m,
                             Name = "68a1a8006928f76bab0bf47d_REF19",
-                            Path = "C:\\Users\\Asus\\Desktop\\RIPMyFriend-Backend\\FileManagement\\Uploads/Articles\\68a1a8006928f76bab0bf47d_REF19.jpg"
+                            Path = "C:/inetpub/api/FileManagement\\Uploads/Articles\\68a1a8006928f76bab0bf47d_REF19.jpg"
                         },
                         new
                         {
@@ -147,7 +117,7 @@ namespace FileManagement.Migrations
                             IsDeleted = false,
                             Length = 270336m,
                             Name = "68a1a990b816e33cfbd857ea_REF5",
-                            Path = "C:\\Users\\Asus\\Desktop\\RIPMyFriend-Backend\\FileManagement\\Uploads/Articles\\68a1a990b816e33cfbd857ea_REF5.jpg"
+                            Path = "C:/inetpub/api/FileManagement\\Uploads/Articles\\68a1a990b816e33cfbd857ea_REF5.jpg"
                         });
                 });
 #pragma warning restore 612, 618

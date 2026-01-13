@@ -3,6 +3,7 @@
     public class PagingParameter
     {
         public string? FilterText { get; set; }
+        public string? Language { get; set; }
 
         const int maxPageSize = 50;
         public int PageNumber { get; set; } = 1;

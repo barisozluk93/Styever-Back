@@ -40,6 +40,6 @@ namespace UserManagement.Entity
         public List<Permission> Permissions { get; set; } = new List<Permission>();
 
         [NotMapped]
-        public FileContentResult? FileResult { get; set; }
+        public Model.File? File { get; set; }
     }
 }

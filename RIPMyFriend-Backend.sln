@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemoryManagement", "MemoryM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArticleManagement", "ArticleManagement\ArticleManagement.csproj", "{5CCC4B35-32A0-47BC-8BDC-A157730A4667}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FAQManagement", "FAQManagement\FAQManagement.csproj", "{DB441D3E-BC81-4F84-B47E-5BE7996A5E31}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{5CCC4B35-32A0-47BC-8BDC-A157730A4667}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5CCC4B35-32A0-47BC-8BDC-A157730A4667}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5CCC4B35-32A0-47BC-8BDC-A157730A4667}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB441D3E-BC81-4F84-B47E-5BE7996A5E31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB441D3E-BC81-4F84-B47E-5BE7996A5E31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB441D3E-BC81-4F84-B47E-5BE7996A5E31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB441D3E-BC81-4F84-B47E-5BE7996A5E31}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

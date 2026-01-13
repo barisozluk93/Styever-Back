@@ -67,7 +67,7 @@ namespace UserManagement.Services
 
                             if (user.IsTrial && user.TrialExpirationDate < DateTime.UtcNow)
                             {
-                                user.IsTrial = false;
+                                //user.IsTrial = false;
                                 await _dbContext.SaveChangesAsync();
 
                                 response.IsPaymentRequired = true;
@@ -209,8 +209,8 @@ namespace UserManagement.Services
 
                     if(user != null)
                     {
-                        //await SendResetPasswordLink(user.Email, "http://localhost:4200/auth/reset-password/" + user.Id);
-                        await SendResetPasswordLink(user.Email, "http://178.251.42.243/auth/reset-password/" + user.Id);
+                        //await SendResetPasswordLink(user.Email, "http://localhost:4200/#/auth/reset-password/" + user.Id);
+                        await SendResetPasswordLink(user.Email, "https://styever.com/#/auth/reset-password/" + user.Id);
 
                         result.SetData(request.Email);
                         result.SetIsSuccess(true);
@@ -373,6 +373,7 @@ namespace UserManagement.Services
                         ua.City = user.UserAddress.City;
                         ua.Country = user.UserAddress.Country;
                         ua.District = user.UserAddress.District;
+                        ua.IsPrimary = true;
 
                         _dbContext.Add(ua);
                         await _dbContext.SaveChangesAsync();

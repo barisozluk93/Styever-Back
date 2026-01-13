@@ -37,7 +37,9 @@ namespace MemoryManagement.Entity
 
         [NotMapped]
         public string? UserName { get; set; }
-        
+
+        [NotMapped]
+        public Model.File? UserAvatar { get; set; }
         [NotMapped]
         public string? UserCityCountry { get; set; }
 

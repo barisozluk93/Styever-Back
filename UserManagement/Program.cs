@@ -88,6 +88,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-//app.Run("http://178.251.42.243:5224");
+//app.Run("http://localhost:5224");
 app.Run();
 

@@ -39,7 +39,7 @@ namespace ArticleManagement.Services
                     var article = await _dbContext.Articles.Where(x => x.Id == id && !x.IsDeleted).FirstOrDefaultAsync();
                     if (article != null)
                     {
-                        article.FileResult = GetFileResult(article.FileId, token).Result;
+                        article.File = GetFile(article.FileId, token).Result;
 
                         result.SetData(article);
                         result.SetMessage("İşlem başarı ile gerçekleşti.");
@@ -59,7 +59,7 @@ namespace ArticleManagement.Services
             return result;
         }
 
-        public async Task<Result<List<Article>>> GetAll(string searchTerm, string token)
+        public async Task<Result<List<Article>>> GetAll(string searchTerm, string language, string token)
         {
             var result = new Result<List<Article>>();
 
@@ -68,7 +68,7 @@ namespace ArticleManagement.Services
                 try
                 {
                     var queryable = await _dbContext.Articles
-                                        .Where(x => !x.IsDeleted && (!string.IsNullOrEmpty(searchTerm) ? x.Header.Contains(searchTerm) : true))
+                                        .Where(x => !x.IsDeleted && (!string.IsNullOrEmpty(searchTerm) ? (language == "tr" ? x.Header.ToLower().Contains(searchTerm.ToLower()) : x.HeaderEn.ToLower().Contains(searchTerm.ToLower())) : true))
                                         .Select(s => new Article
                                         {
                                             Header = s.Header,
@@ -82,7 +82,7 @@ namespace ArticleManagement.Services
                                             ContentEn = s.ContentEn
                                         }).ToListAsync();
 
-                    queryable.ForEach(x => x.FileResult = GetFileResult(x.FileId, token).Result);
+                    queryable.ForEach(x => x.File = GetFile(x.FileId, token).Result);
                     
                     result.SetData(queryable);
                     result.SetMessage("İşlem başarı ile gerçekleşti.");
@@ -98,12 +98,12 @@ namespace ArticleManagement.Services
         }
 
         
-        private async Task<FileContentResult> GetFileResult(long id, string token)
+        private async Task<Model.File> GetFile(long id, string token)
         {
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api2/File/" + id);
+            var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api/File/" + id);
 
             if (response.IsSuccessStatusCode)
             {
@@ -117,8 +117,7 @@ namespace ArticleManagement.Services
 
                         if (result.GetData() != null)
                         {
-                            byte[] bytes = System.IO.File.ReadAllBytes(result.GetData().Path);
-                            return new FileContentResult(bytes, result.GetData().ContentType);
+                            return result.GetData();
                         }
                         else
                         {

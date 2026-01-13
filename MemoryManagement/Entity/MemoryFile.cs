@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MemoryManagement.Model;
+using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MemoryManagement.Entity
@@ -20,8 +21,8 @@ namespace MemoryManagement.Entity
         [NotMapped]
         public string? FileName { get; set; }
 
-        [NotMapped]
-        public FileContentResult? FileResult { get; set; }
 
+        [NotMapped]
+        public Model.File? File { get; set; }
     }
 }

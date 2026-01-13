@@ -77,7 +77,7 @@ namespace FileManagement.Services
             return result;
         }
 
-        public async Task<Result<Entity.File>> Save(IFormFile file)
+        public async Task<Result<Entity.File>> Save(IFormFile file, int type)
         {
             var result = new Result<Entity.File>();
 
@@ -85,7 +85,15 @@ namespace FileManagement.Services
             {
                 try
                 {
-                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", Guid.NewGuid().ToString() + Path.GetExtension(file.FileName));
+                    var filePath = "";
+                    if (type == 1)
+                    {
+                        filePath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", "Avatars", Guid.NewGuid().ToString() + Path.GetExtension(file.FileName));
+                    }
+                    else if (type == 2)
+                    {
+                        filePath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", "Memories", Guid.NewGuid().ToString() + Path.GetExtension(file.FileName));
+                    }
 
                     Entity.File dbItem = new Entity.File();
                     dbItem.Name = file.FileName;

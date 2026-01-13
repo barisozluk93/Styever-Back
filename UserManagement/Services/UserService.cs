@@ -157,7 +157,8 @@ namespace UserManagement.Services
                         ua.City = user.UserAddress.City;
                         ua.Country = user.UserAddress.Country;
                         ua.District = user.UserAddress.District;
-                            
+                        ua.IsPrimary = true;
+
                         _dbContext.Add(ua);
                         await _dbContext.SaveChangesAsync();
 
@@ -322,7 +323,7 @@ namespace UserManagement.Services
 
                         if (user.FileId.HasValue)
                         {
-                            user.FileResult = await GetFileResult(user.FileId.Value, token);
+                            user.File = await GetFile(user.FileId.Value, token);
                         }
 
                         result.SetData(user);
@@ -660,12 +661,12 @@ namespace UserManagement.Services
             return Convert.ToHexString(hash);
         }
 
-        private async Task<FileContentResult> GetFileResult(long id, string token)
+        private async Task<Model.File> GetFile(long id, string token)
         {
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync(configuration["AppSettings:ApiUrl"] + "/api2/File/" + id);
+            var response = await client.GetAsync(configuration["AppSettings:ApiUrl"] + "/api/File/" + id);
 
             if (response.IsSuccessStatusCode)
             {
@@ -679,8 +680,7 @@ namespace UserManagement.Services
 
                         if (result != null)
                         {
-                            byte[] bytes = System.IO.File.ReadAllBytes(result.GetData().Path);
-                            return new FileContentResult(bytes, result.GetData().ContentType);
+                            return result.GetData();
                         }
                         else
                         {

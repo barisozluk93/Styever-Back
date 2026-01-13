@@ -9,7 +9,7 @@ using MemoryManagement.Interfaces;
 
 namespace MemoryManagement.Controllers
 {
-    [Route("/api2/[controller]")]
+    [Route("/api/[controller]")]
     [ApiController]
     public class MemoryController : ControllerBase
     {

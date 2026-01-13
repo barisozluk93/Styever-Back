@@ -19,7 +19,7 @@ namespace ArticleManagement.Entity
         public bool IsDeleted { get; set; }
 
         [NotMapped]
-        public FileContentResult? FileResult { get; set; }
+        public Model.File? File { get; set; }
 
 
 

@@ -1,0 +1,6 @@
+@FAQManagement_HostAddress = http://localhost:5226
+
+GET {{FAQManagement_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

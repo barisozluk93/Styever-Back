@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FileManagement.Controllers
 {
-    [Route("api2/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class FileController : ControllerBase
     {
@@ -17,9 +17,9 @@ namespace FileManagement.Controllers
         }
 
         [HttpPost("Save")]
-        public async Task<IActionResult> Save(IFormFile file)
+        public async Task<IActionResult> Save([FromForm] IFormFile file, [FromForm] int type)
         {
-            var result = await _fileService.Save(file);
+            var result = await _fileService.Save(file, type);
             return new OkObjectResult(result);
         }
 

@@ -90,7 +90,8 @@ namespace UserManagement.DbContexts
                     ExpirationDate = DateTime.UtcNow.AddYears(1),
                     Salt = Convert.FromBase64String("A/u2bAGlBV91ByotxKC+wkGpMDFjFnixpfY5ul7YO1Aw5dIfBa3bhlNJWsTc2KMO22o0tw36D4+a0FUtHTQNaQ=="),
                     IsDeleted = false,
-                    IsSystemData = true
+                    IsSystemData = true,
+                    FileId = 1
                 },
                 new User
                 {
@@ -106,7 +107,8 @@ namespace UserManagement.DbContexts
                     ExpirationDate = DateTime.UtcNow.AddYears(1),
                     Salt = Convert.FromBase64String("A/u2bAGlBV91ByotxKC+wkGpMDFjFnixpfY5ul7YO1Aw5dIfBa3bhlNJWsTc2KMO22o0tw36D4+a0FUtHTQNaQ=="),
                     IsDeleted = false,
-                    IsSystemData = true
+                    IsSystemData = true,
+                    FileId = 2
                 },
                 new User
                 {
@@ -122,7 +124,8 @@ namespace UserManagement.DbContexts
                     ExpirationDate = DateTime.UtcNow.AddYears(1),
                     Salt = Convert.FromBase64String("A/u2bAGlBV91ByotxKC+wkGpMDFjFnixpfY5ul7YO1Aw5dIfBa3bhlNJWsTc2KMO22o0tw36D4+a0FUtHTQNaQ=="),
                     IsDeleted = false,
-                    IsSystemData = true
+                    IsSystemData = true,
+                    FileId = 3
                 }
             );
 

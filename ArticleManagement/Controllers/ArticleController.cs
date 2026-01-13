@@ -9,7 +9,7 @@ using ArticleManagement.Interfaces;
 
 namespace ArticleManagement.Controllers
 {
-    [Route("/api2/[controller]")]
+    [Route("/api/[controller]")]
     [ApiController]
     public class ArticleController : ControllerBase
     {
@@ -34,7 +34,7 @@ namespace ArticleManagement.Controllers
         public async Task<IActionResult> GetAll([FromQuery] PagingParameter pagingParameter)
         {
             var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(' ').Last();
-            var result = await _articleService.GetAll(pagingParameter.FilterText, token);
+            var result = await _articleService.GetAll(pagingParameter.FilterText, pagingParameter.Language, token);
             return new OkObjectResult(result);
         }
     }
