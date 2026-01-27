@@ -29,6 +29,7 @@ namespace UserManagement.Controllers
 
         [HttpGet("All")]
         [Authorize]
+        [HasPermission("PermissionScene.List.Permission")]
 
         public async Task<IActionResult> GetAll()
         {
@@ -68,6 +69,7 @@ namespace UserManagement.Controllers
 
         [HttpGet("{id}")]
         [Authorize]
+        [HasPermission("PermissionScene.GeById.Permission")]
 
         public async Task<IActionResult> GetById(long id)
         {

@@ -1,7 +1,7 @@
-{
+/*{
   "Routes": [
     {
-      "DownstreamPathTemplate": "/api2/Permission/{everything}",
+      "DownstreamPathTemplate": "/api/Permission/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -9,11 +9,11 @@
           "Port": 5224
         }
       ],
-      "UpstreamPathTemplate": "/api2/Permission/{everything}",
+      "UpstreamPathTemplate": "/api/Permission/{everything}",
       "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
     },
     {
-      "DownstreamPathTemplate": "/api2/Role/{everything}",
+      "DownstreamPathTemplate": "/api/Role/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -21,11 +21,11 @@
           "Port": 5224
         }
       ],
-      "UpstreamPathTemplate": "/api2/Role/{everything}",
+      "UpstreamPathTemplate": "/api/Role/{everything}",
       "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
     },
     {
-      "DownstreamPathTemplate": "/api2/User/{everything}",
+      "DownstreamPathTemplate": "/api/User/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -33,11 +33,11 @@
           "Port": 5224
         }
       ],
-      "UpstreamPathTemplate": "/api2/User/{everything}",
+      "UpstreamPathTemplate": "/api/User/{everything}",
       "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
     },
     {
-      "DownstreamPathTemplate": "/api2/Auth/{everything}",
+      "DownstreamPathTemplate": "/api/Auth/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -45,11 +45,11 @@
           "Port": 5224
         }
       ],
-      "UpstreamPathTemplate": "/api2/Auth/{everything}",
+      "UpstreamPathTemplate": "/api/Auth/{everything}",
       "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
     },
     {
-      "DownstreamPathTemplate": "/api2/File/{everything}",
+      "DownstreamPathTemplate": "/api/File/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -57,11 +57,11 @@
           "Port": 5015
         }
       ],
-      "UpstreamPathTemplate": "/api2/File/{everything}",
+      "UpstreamPathTemplate": "/api/File/{everything}",
       "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
     },
     {
-      "DownstreamPathTemplate": "/api2/Memory/{everything}",
+      "DownstreamPathTemplate": "/api/Memory/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -69,11 +69,11 @@
           "Port": 5117
         }
       ],
-      "UpstreamPathTemplate": "/api2/Memory/{everything}",
+      "UpstreamPathTemplate": "/api/Memory/{everything}",
       "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
     },
     {
-      "DownstreamPathTemplate": "/api2/Article/{everything}",
+      "DownstreamPathTemplate": "/api/Article/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
@@ -81,103 +81,175 @@
           "Port": 5220
         }
       ],
-      "UpstreamPathTemplate": "/api2/Article/{everything}",
+      "UpstreamPathTemplate": "/api/Article/{everything}",
       "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
-    }
+    },
+  {
+	  "DownstreamPathTemplate": "/api/FAQ/{everything}",
+	  "DownstreamScheme": "http",
+	  "DownstreamHostAndPorts": [
+		{
+		  "Host": "localhost",
+		  "Port": 5226
+		}
+	  ],
+	  "UpstreamPathTemplate": "/api/FAQ/{everything}",
+	  "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
+	},
+  {
+      "DownstreamPathTemplate": "/api/Notification/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5029
+        }
+      ],
+      "UpstreamPathTemplate": "api/Notification/{everything}",
+      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
+  },
+  {
+	  "DownstreamPathTemplate": "/api/ContactUs/{everything}",
+	  "DownstreamScheme": "http",
+	  "DownstreamHostAndPorts": [
+		{
+		  "Host": "localhost",
+		  "Port": 5007
+		}
+	  ],
+	  "UpstreamPathTemplate": "/api/ContactUs/{everything}",
+	  "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
+	}
   ],
   "GlobalConfiguration": {
     "BaseUrl": "http://localhost:5058"
   }
-}
+}*/
 
-//{
-//  "Routes": [
-//    {
-//      "DownstreamPathTemplate": "/api2/Permission/{everything}",
-//      "DownstreamScheme": "http",
-//      "DownstreamHostAndPorts": [
-//        {
-//          "Host": "178.251.42.243",
-//          "Port": 5224
-//        }
-//      ],
-//      "UpstreamPathTemplate": "/api2/Permission/{everything}",
-//      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
-//    },
-//    {
-//      "DownstreamPathTemplate": "/api2/Role/{everything}",
-//      "DownstreamScheme": "http",
-//      "DownstreamHostAndPorts": [
-//        {
-//          "Host": "178.251.42.243",
-//          "Port": 5224
-//        }
-//      ],
-//      "UpstreamPathTemplate": "/api2/Role/{everything}",
-//      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
-//    },
-//    {
-//      "DownstreamPathTemplate": "/api2/User/{everything}",
-//      "DownstreamScheme": "http",
-//      "DownstreamHostAndPorts": [
-//        {
-//          "Host": "178.251.42.243",
-//          "Port": 5224
-//        }
-//      ],
-//      "UpstreamPathTemplate": "/api2/User/{everything}",
-//      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
-//    },
-//    {
-//      "DownstreamPathTemplate": "/api2/Auth/{everything}",
-//      "DownstreamScheme": "http",
-//      "DownstreamHostAndPorts": [
-//        {
-//          "Host": "178.251.42.243",
-//          "Port": 5224
-//        }
-//      ],
-//      "UpstreamPathTemplate": "/api2/Auth/{everything}",
-//      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
-//    },
-//    {
-//      "DownstreamPathTemplate": "/api2/File/{everything}",
-//      "DownstreamScheme": "http",
-//      "DownstreamHostAndPorts": [
-//        {
-//          "Host": "178.251.42.243",
-//          "Port": 5015
-//        }
-//      ],
-//      "UpstreamPathTemplate": "/api2/File/{everything}",
-//      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
-//    },
-//    {
-//      "DownstreamPathTemplate": "/api2/Memory/{everything}",
-//      "DownstreamScheme": "http",
-//      "DownstreamHostAndPorts": [
-//        {
-//          "Host": "178.251.42.243",
-//          "Port": 5117
-//        }
-//      ],
-//      "UpstreamPathTemplate": "/api2/Memory/{everything}",
-//      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
-//    },
-//    {
-//      "DownstreamPathTemplate": "/api2/Article/{everything}",
-//      "DownstreamScheme": "http",
-//      "DownstreamHostAndPorts": [
-//        {
-//          "Host": "178.251.42.243",
-//          "Port": 5220
-//        }
-//      ],
-//      "UpstreamPathTemplate": "/api2/Article/{everything}",
-//      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
-//    }
-//  ],
-//  "GlobalConfiguration": {
-//    "BaseUrl": "http://178.251.42.243:5058"
-//  }
-//}
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/api/Permission/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5224
+        }
+      ],
+      "UpstreamPathTemplate": "/Permission/{everything}",
+      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Role/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5224
+        }
+      ],
+      "UpstreamPathTemplate": "/Role/{everything}",
+      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/User/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5224
+        }
+      ],
+      "UpstreamPathTemplate": "/User/{everything}",
+      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Auth/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5224
+        }
+      ],
+      "UpstreamPathTemplate": "/Auth/{everything}",
+      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/File/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5015
+        }
+      ],
+      "UpstreamPathTemplate": "/File/{everything}",
+      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Memory/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5117
+        }
+      ],
+      "UpstreamPathTemplate": "/Memory/{everything}",
+      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Article/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5220
+        }
+      ],
+      "UpstreamPathTemplate": "/Article/{everything}",
+      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/FAQ/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5226
+        }
+      ],
+      "UpstreamPathTemplate": "/FAQ/{everything}",
+      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/Notification/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5029
+        }
+      ],
+      "UpstreamPathTemplate": "/Notification/{everything}",
+      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
+    },
+    {
+      "DownstreamPathTemplate": "/api/ContactUs/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5007
+        }
+      ],
+      "UpstreamPathTemplate": "/ContactUs/{everything}",
+      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
+    }
+  ],
+  "GlobalConfiguration": {
+
+  }
+}

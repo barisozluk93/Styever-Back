@@ -25,10 +25,15 @@ namespace UserManagement.Entity
         public bool IsSystemData { get; set; }
         public long? FileId { get; set; }
         public bool IsTrial { get; set; }
+        public bool IsActive { get; set; }
+
         public DateTime CreatedDate { get; set; }
         public DateTime ExpirationDate { get; set; }
 
         public DateTime TrialExpirationDate { get; set; }
+
+        [NotMapped]
+        public Guid? Voucher { get; set; }
 
         [NotMapped]
         public UserAddress? UserAddress { get; set; }

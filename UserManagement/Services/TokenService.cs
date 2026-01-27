@@ -37,6 +37,7 @@ namespace UserManagement.Services
                         new Claim("id", request.User.Id.ToString()),
                         new Claim("roles", JsonConvert.SerializeObject(request.User.Roles)),
                         new Claim("permissions", JsonConvert.SerializeObject(request.User.Permissions.Select(s => s.Id))),
+                        new Claim("isActive", JsonConvert.SerializeObject(request.User.IsActive)),
                     },
                     notBefore: dateTimeNow,
                     expires: dateTimeNow.ToLocalTime().AddMinutes(Convert.ToInt32(configuration["AppSettings:TokenValidityInMinutes"])),

@@ -79,7 +79,7 @@ namespace MemoryManagement.Services
             return result;
         }
 
-        public async Task<Result<Memory>> GetById(long id, string token)
+        public async Task<Result<Memory>> GetById(long id)
         {
             var result = new Result<Memory>();
 
@@ -90,22 +90,31 @@ namespace MemoryManagement.Services
                     var memory = await _dbContext.Memories.Include(x => x.Category).Where(x => x.Id == id && !x.IsDeleted).FirstOrDefaultAsync();
                     if (memory != null)
                     {
+                        memory.HasDonation = HasDonation(memory.UserId).Result;
+
+                        memory.YoutubeLinks = await _dbContext.MemoryYoutubeLinks.Where(x => x.MemoryId == id && !x.IsDeleted).ToListAsync();
+
                         memory.Files = await _dbContext.MemoryFiles.Where(x => x.MemoryId == id && !x.IsDeleted).ToListAsync();
-                        memory.Files.ForEach(x => x.File = GetFile(x.FileId, token).Result);
-                        memory.Files.ForEach(x => x.FileName = GetFileName(x.FileId, token).Result);
+                        memory.Files.ForEach(x => x.File = GetFile(x.FileId).Result);
+                        memory.Files.ForEach(x => x.FileName = GetFileName(x.FileId).Result);
+
+                        memory.Candles = await _dbContext.MemoryCandles.Where(x => x.MemoryId == id && !x.IsDeleted).GroupBy(x => x.UserId).Select(g => g.First()).ToListAsync();
+                        memory.CandlesCount = await _dbContext.MemoryCandles.Where(x => x.MemoryId == id && !x.IsDeleted).GroupBy(x => x.UserId).CountAsync();
+                        memory.Candles.ForEach(x => x.UserName = GetUserName(x.UserId).Result);
+                        memory.Candles.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId).Result);
 
                         memory.Comments = await _dbContext.MemoryComments.Where(x => x.MemoryId == id && !x.IsDeleted).ToListAsync();
                         memory.CommentsCount = await _dbContext.MemoryComments.Where(x => x.MemoryId == id && !x.IsDeleted).CountAsync();
-                        memory.Comments.ForEach(x => x.UserName = GetUserName(x.UserId, token).Result);
-                        memory.Comments.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId, token).Result);
+                        memory.Comments.ForEach(x => x.UserName = GetUserName(x.UserId).Result);
+                        memory.Comments.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId).Result);
 
                         memory.Likes = await _dbContext.MemoryLikes.Where(x => x.MemoryId == id && !x.IsDeleted).ToListAsync();
                         memory.LikesCount = await _dbContext.MemoryLikes.Where(x => x.MemoryId == id && !x.IsDeleted).CountAsync();
-                        memory.Likes.ForEach(x => x.UserName = GetUserName(x.UserId, token).Result);
-                        memory.Likes.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId, token).Result);
+                        memory.Likes.ForEach(x => x.UserName = GetUserName(x.UserId).Result);
+                        memory.Likes.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId).Result);
 
-                        memory.UserName = await GetUserName(memory.UserId, token);
-                        memory.UserCityCountry = await GetUserCityCountry(memory.UserId, token);
+                        memory.UserName = await GetUserName(memory.UserId);
+                        memory.UserCityCountry = await GetUserCityCountry(memory.UserId);
 
                         result.SetData(memory);
                         result.SetMessage("İşlem başarı ile gerçekleşti.");
@@ -125,7 +134,118 @@ namespace MemoryManagement.Services
             return result;
         }
 
-        public async Task<Result<PagingResult<PagedList<Memory>>>> MemoriesPaginate(PagingParameter pagingParameter, string token)
+        public async Task<Result<bool>> ChangeBelongingIssuesUserMemory(long userId, long memoryId)
+        {
+            var result = new Result<bool>();
+
+            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            {
+                try
+                {
+                    var memories = await _dbContext.Memories.Include(x => x.Category).Where(x => x.UserId == userId && !x.IsDeleted && x.Id != memoryId).ToListAsync();
+                    if (memories != null && memories.Count() > 0)
+                    {
+                        memories.ForEach(memory => memory.BelongingToOldPackage = true);
+                        await _dbContext.SaveChangesAsync();
+
+                        result.SetData(true);
+                        result.SetMessage("İşlem başarı ile gerçekleşti.");
+                    }
+                    else
+                    {
+                        result.SetData(true);
+                        result.SetMessage("İşlem başarı ile gerçekleşti.");
+                    }
+
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+
+                    result.SetIsSuccess(false);
+                    result.SetMessage(ex.Message);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<Result<bool>> ActivateUserMemories(long userId)
+        {
+            var result = new Result<bool>();
+
+            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            {
+                try
+                {
+                    var memories = await _dbContext.Memories.Include(x => x.Category).Where(x => x.UserId == userId && x.IsDeleted).ToListAsync();
+                    if (memories != null && memories.Count() > 0)
+                    {
+                        memories.ForEach(memory => memory.IsDeleted = false);
+                        await _dbContext.SaveChangesAsync();
+
+                        result.SetData(true);
+                        result.SetMessage("İşlem başarı ile gerçekleşti.");
+                    }
+                    else
+                    {
+                        result.SetData(true);
+                        result.SetMessage("İşlem başarı ile gerçekleşti.");
+                    }
+
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+
+                    result.SetIsSuccess(false);
+                    result.SetMessage(ex.Message);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<Result<bool>> DeactivateUserMemories(long userId)
+        {
+            var result = new Result<bool>();
+
+            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            {
+                try
+                {
+                    var memories = await _dbContext.Memories.Include(x => x.Category).Where(x => x.UserId == userId && !x.IsDeleted).ToListAsync();
+                    if (memories != null && memories.Count() > 0)
+                    {
+                        memories.ForEach(memory => memory.IsDeleted = true);
+                        await _dbContext.SaveChangesAsync();
+
+                        result.SetData(true);
+                        result.SetMessage("İşlem başarı ile gerçekleşti.");
+                    }
+                    else
+                    {
+                        result.SetData(true);
+                        result.SetMessage("İşlem başarı ile gerçekleşti.");
+                    }
+
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+
+                    result.SetIsSuccess(false);
+                    result.SetMessage(ex.Message);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<Result<PagingResult<PagedList<Memory>>>> MemoriesPaginate(PagingParameter pagingParameter)
         {
             var result = new Result<PagingResult<PagedList<Memory>>>();
 
@@ -133,43 +253,83 @@ namespace MemoryManagement.Services
             {
                 try
                 {
-                    string lowerFilterText = string.IsNullOrEmpty(pagingParameter.FilterText) ? null : pagingParameter.FilterText.ToLower();
+                    string lowerFilterText = string.IsNullOrEmpty(pagingParameter.FilterText) ? null : pagingParameter.FilterText.ToLowerInvariant();
+                    IQueryable<Memory> queryable;
 
-
-                    var queryable = _dbContext.Memories.Include(x => x.Category)
-                                                       .Where(x => !x.IsDeleted && !x.IsPrivate &&
-                                                             (String.IsNullOrEmpty(lowerFilterText) || (x.Name.ToLower().Contains(lowerFilterText))) &&
-                                                             (pagingParameter.CategoryId != null ? x.CategoryId == pagingParameter.CategoryId : true)
-                                                        )
-                    .Select(s => new Memory
+                    if (pagingParameter.UserId.HasValue)
                     {
-                        Id = s.Id,
-                        Name = s.Name,
-                        BirthDate = s.BirthDate,
-                        DeathDate = s.DeathDate,
-                        UserId = s.UserId,
-                        IsDeleted = s.IsDeleted,
-                        Category = s.Category,
-                        CategoryId = s.CategoryId,
-                        IsOpenToComment = s.IsOpenToComment,
-                        PostDate = s.PostDate,
-                        Text = s.Text,
-                        CommentsCount = _dbContext.MemoryComments.Where(x => x.MemoryId == s.Id && !x.IsDeleted).Count(),
-                        Comments = _dbContext.MemoryComments.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList(),
-                        Likes = _dbContext.MemoryLikes.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList(),
-                        LikesCount = _dbContext.MemoryLikes.Where(x => x.MemoryId == s.Id && !x.IsDeleted).Count(),
-                        Files = _dbContext.MemoryFiles.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList()
-                    });
+                        queryable = _dbContext.Memories.Include(x => x.Category)
+                                                    .Where(x => !x.IsDeleted && x.UserId ==  pagingParameter.UserId &&
+                                                    (String.IsNullOrEmpty(lowerFilterText) || (x.Name.ToLower().Contains(lowerFilterText))) &&
+                                                                 (pagingParameter.CategoryId != null ? x.CategoryId == pagingParameter.CategoryId : true))
+                        .Select(s => new Memory
+                         {
+                             Id = s.Id,
+                             Name = s.Name,
+                             BirthDate = s.BirthDate,
+                             DeathDate = s.DeathDate,
+                             UserId = s.UserId,
+                             IsDeleted = s.IsDeleted,
+                             Category = s.Category,
+                             CategoryId = s.CategoryId,
+                             IsOpenToComment = s.IsOpenToComment,
+                             IsPrivate = s.IsPrivate,
+                             IsLinkOnly = s.IsLinkOnly,
+                             PostDate = s.PostDate,
+                             Text = s.Text,
+                             CandlesCount = _dbContext.MemoryCandles.Where(x => x.MemoryId == s.Id && !x.IsDeleted).GroupBy(x => x.UserId).Count(),
+                             Candles = _dbContext.MemoryCandles.Where(x => x.MemoryId == s.Id && !x.IsDeleted).GroupBy(x => x.UserId).Select(g => g.First()).ToList(),
+                             CommentsCount = _dbContext.MemoryComments.Where(x => x.MemoryId == s.Id && !x.IsDeleted).Count(),
+                             Comments = _dbContext.MemoryComments.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList(),
+                             Likes = _dbContext.MemoryLikes.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList(),
+                             LikesCount = _dbContext.MemoryLikes.Where(x => x.MemoryId == s.Id && !x.IsDeleted).Count(),
+                             Files = _dbContext.MemoryFiles.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList(),
+                         });
+                    }
+                    else
+                    {
+                        queryable = _dbContext.Memories.Include(x => x.Category)
+                                                           .Where(x => !x.IsDeleted && !x.IsLinkOnly &&
+                                                                 (String.IsNullOrEmpty(lowerFilterText) || (x.Name.ToLower().Contains(lowerFilterText))) &&
+                                                                 (pagingParameter.CategoryId != null ? x.CategoryId == pagingParameter.CategoryId : true)
+                                                            )
+                        .Select(s => new Memory
+                        {
+                            Id = s.Id,
+                            Name = s.Name,
+                            BirthDate = s.BirthDate,
+                            DeathDate = s.DeathDate,
+                            UserId = s.UserId,
+                            IsDeleted = s.IsDeleted,
+                            Category = s.Category,
+                            CategoryId = s.CategoryId,
+                            IsOpenToComment = s.IsOpenToComment,
+                            IsPrivate = s.IsPrivate,
+                            PostDate = s.PostDate,
+                            Text = s.Text,
+                            CandlesCount = _dbContext.MemoryCandles.Where(x => x.MemoryId == s.Id && !x.IsDeleted).GroupBy(x => x.UserId).Count(),
+                            Candles = _dbContext.MemoryCandles.Where(x => x.MemoryId == s.Id && !x.IsDeleted).GroupBy(x => x.UserId).Select(g => g.First()).ToList(),
+                            CommentsCount = _dbContext.MemoryComments.Where(x => x.MemoryId == s.Id && !x.IsDeleted).Count(),
+                            Comments = _dbContext.MemoryComments.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList(),
+                            Likes = _dbContext.MemoryLikes.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList(),
+                            LikesCount = _dbContext.MemoryLikes.Where(x => x.MemoryId == s.Id && !x.IsDeleted).Count(),
+                            Files = _dbContext.MemoryFiles.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList(),
+                            YoutubeLinks = _dbContext.MemoryYoutubeLinks.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList()
+                        });
+                    }
 
                     var pagination = PagedList<Memory>.ToPagedList(queryable, pagingParameter.PageNumber, pagingParameter.PageSize);
-                    pagination.ForEach(x => x.Files.ForEach(y => y.File = GetFile(y.FileId, token).Result));
-                    pagination.ForEach(x => x.UserName = GetUserName(x.UserId, token).Result);
-                    pagination.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId, token).Result);
-                    pagination.ForEach(x => x.UserCityCountry = GetUserCityCountry(x.UserId, token).Result);
-                    pagination.ForEach(x => x.Comments.ForEach(y => y.UserName = GetUserName(y.UserId, token).Result));
-                    pagination.ForEach(x => x.Comments.ForEach(y => y.UserAvatar = GetUserAvatar(y.UserId, token).Result));
-                    pagination.ForEach(x => x.Likes.ForEach(y => y.UserName = GetUserName(y.UserId, token).Result));
-                    pagination.ForEach(x => x.Likes.ForEach(y => y.UserAvatar = GetUserAvatar(y.UserId, token).Result));
+                    pagination.ForEach(x => x.HasDonation = HasDonation(x.UserId).Result);
+                    pagination.ForEach(x => x.Files.ForEach(y => y.File = GetFile(y.FileId).Result));
+                    pagination.ForEach(x => x.UserName = GetUserName(x.UserId).Result);
+                    pagination.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId).Result);
+                    pagination.ForEach(x => x.UserCityCountry = GetUserCityCountry(x.UserId).Result);
+                    pagination.ForEach(x => x.Candles.ForEach(y => y.UserName = GetUserName(y.UserId).Result));
+                    pagination.ForEach(x => x.Candles.ForEach(y => y.UserAvatar = GetUserAvatar(y.UserId).Result));
+                    pagination.ForEach(x => x.Comments.ForEach(y => y.UserName = GetUserName(y.UserId).Result));
+                    pagination.ForEach(x => x.Comments.ForEach(y => y.UserAvatar = GetUserAvatar(y.UserId).Result));
+                    pagination.ForEach(x => x.Likes.ForEach(y => y.UserName = GetUserName(y.UserId).Result));
+                    pagination.ForEach(x => x.Likes.ForEach(y => y.UserAvatar = GetUserAvatar(y.UserId).Result));
 
                     result.SetData(new PagingResult<PagedList<Memory>>()
                     {
@@ -236,6 +396,7 @@ namespace MemoryManagement.Services
                         {
                             oldMemory.Name = memory.Name;
                             oldMemory.IsPrivate = memory.IsPrivate;
+                            oldMemory.IsLinkOnly = memory.IsLinkOnly;
                             oldMemory.BirthDate = memory.BirthDate;
                             oldMemory.DeathDate = memory.DeathDate;
                             oldMemory.CategoryId = memory.CategoryId;
@@ -253,6 +414,69 @@ namespace MemoryManagement.Services
                             result.SetIsSuccess(false);
                             result.SetMessage("Aynı isim veya kodla tanımlı bir yetki bulunmaktadır.");
                         }
+                    }
+                    else
+                    {
+                        result.SetIsSuccess(false);
+                        result.SetMessage("Böyle bir kayıt bulunmamaktadır.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+
+                    result.SetIsSuccess(false);
+                    result.SetMessage(ex.Message);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<Result<MemoryYoutubeLink>> MemoryYoutubeLinkAdd(MemoryYoutubeLink memoryYoutubeLink)
+        {
+            var result = new Result<MemoryYoutubeLink>();
+
+            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            {
+                try
+                {
+                    _dbContext.Add(memoryYoutubeLink);
+                    await _dbContext.SaveChangesAsync();
+                    transaction.Commit();
+
+                    result.SetData(memoryYoutubeLink);
+                    result.SetMessage("İşlem başarı ile gerçekleşti.");
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+
+                    result.SetIsSuccess(false);
+                    result.SetMessage(ex.Message);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<Result<MemoryYoutubeLink>> MemoryYoutubeLinkDelete(long id)
+        {
+            var result = new Result<MemoryYoutubeLink>();
+
+            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            {
+                try
+                {
+                    var oldMemoryYoutubeLink = await _dbContext.MemoryYoutubeLinks.Where(x => x.Id == id && !x.IsDeleted).FirstOrDefaultAsync();
+                    if (oldMemoryYoutubeLink != null)
+                    {
+                        oldMemoryYoutubeLink.IsDeleted = true;
+                        await _dbContext.SaveChangesAsync();
+                        transaction.Commit();
+
+                        result.SetData(oldMemoryYoutubeLink);
+                        result.SetMessage("İşlem başarı ile gerçekleşti.");
                     }
                     else
                     {
@@ -334,8 +558,44 @@ namespace MemoryManagement.Services
 
             return result;
         }
+        public async Task<Result<List<MemoryCandle>>> CandleAll(long memoryId)
+        {
+            var result = new Result<List<MemoryCandle>>();
 
-        public async Task<Result<List<MemoryComment>>> CommentAll(string token, long memoryId)
+            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            {
+                try
+                {
+                    var queryable = await _dbContext.MemoryCandles.Include(x => x.Memory)
+                                        .Where(x => x.MemoryId == memoryId && !x.IsDeleted)
+                                        .Select(s => new MemoryCandle
+                                        {
+                                            Date = s.Date,
+                                            Id = s.Id,
+                                            IsDeleted = s.IsDeleted,
+                                            UserId = s.UserId,
+                                            MemoryId = memoryId
+                                        })
+                                        .GroupBy(x => x.UserId)
+                                        .Select(s => s.First())
+                                        .ToListAsync();
+
+                    queryable.ForEach(x => x.UserName = GetUserName(x.UserId).Result);
+                    queryable.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId).Result);
+
+                    result.SetData(queryable);
+                    result.SetMessage("İşlem başarı ile gerçekleşti.");
+                }
+                catch (Exception ex)
+                {
+                    result.SetIsSuccess(false);
+                    result.SetMessage(ex.Message);
+                }
+            }
+
+            return result;
+        }
+        public async Task<Result<List<MemoryComment>>> CommentAll(long memoryId)
         {
             var result = new Result<List<MemoryComment>>();
 
@@ -355,8 +615,8 @@ namespace MemoryManagement.Services
                                             MemoryId = memoryId
                                         }).ToListAsync();
 
-                    queryable.ForEach(x => x.UserName = GetUserName(x.UserId, token).Result);
-                    queryable.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId, token).Result);
+                    queryable.ForEach(x => x.UserName = GetUserName(x.UserId).Result);
+                    queryable.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId).Result);
                     
                     result.SetData(queryable);
                     result.SetMessage("İşlem başarı ile gerçekleşti.");
@@ -371,7 +631,7 @@ namespace MemoryManagement.Services
             return result;
         }
 
-        public async Task<Result<List<MemoryLike>>> LikeAll(string token, long memoryId)
+        public async Task<Result<List<MemoryLike>>> LikeAll(long memoryId)
         {
             var result = new Result<List<MemoryLike>>();
 
@@ -390,8 +650,8 @@ namespace MemoryManagement.Services
                                             MemoryId = memoryId
                                         }).ToListAsync();
 
-                    queryable.ForEach(x => x.UserName = GetUserName(x.UserId, token).Result);
-                    queryable.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId, token).Result);
+                    queryable.ForEach(x => x.UserName = GetUserName(x.UserId).Result);
+                    queryable.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId).Result);
 
                     result.SetData(queryable);
                     result.SetMessage("İşlem başarı ile gerçekleşti.");
@@ -519,10 +779,112 @@ namespace MemoryManagement.Services
             return result;
         }
 
-        private async Task<string> GetUserCityCountry(long id, string token)
+        public async Task<Result<MemoryCandle>> LightCandle(MemoryCandle memoryCandle)
+        {
+            var result = new Result<MemoryCandle>();
+
+            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            {
+                try
+                {
+                    memoryCandle.Date = DateTime.UtcNow;
+                    _dbContext.MemoryCandles.Add(memoryCandle);
+                    await _dbContext.SaveChangesAsync();
+                    transaction.Commit();
+
+                    result.SetData(memoryCandle);
+                    result.SetMessage("İşlem başarı ile gerçekleşti.");
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+
+                    result.SetIsSuccess(false);
+                    result.SetMessage(ex.Message);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<Result<MemoryCandle>> UpdateCandle(MemoryCandle memoryCandle)
+        {
+            var result = new Result<MemoryCandle>();
+
+            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            {
+                try
+                {
+                    if (await _dbContext.MemoryCandles.Where(x => x.Id == memoryCandle.Id).AnyAsync())
+                    {
+                        var newCandle = await _dbContext.MemoryCandles.Where(x => x.Id == memoryCandle.Id).FirstOrDefaultAsync();
+                        newCandle.Shelter = memoryCandle.Shelter;
+                        newCandle.Donation = memoryCandle.Donation;
+
+                        await _dbContext.SaveChangesAsync();
+                        transaction.Commit();
+                    }
+
+                    result.SetData(memoryCandle);
+                    result.SetMessage("İşlem başarı ile gerçekleşti.");
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+
+                    result.SetIsSuccess(false);
+                    result.SetMessage(ex.Message);
+                }
+            }
+
+            return result;
+        }
+
+        private async Task<bool> HasDonation(long id)
         {
             HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api/User/" + id);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseStr = await response.Content.ReadAsStringAsync();
+
+                if (!string.IsNullOrEmpty(responseStr))
+                {
+                    try
+                    {
+                        Result<User> result = JsonConvert.DeserializeObject<Result<User>>(responseStr);
+                        if (result.GetData().IsTrial && result.GetData().TrialExpirationDate < DateTime.UtcNow)
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            return true;
+
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        return false;
+                    }
+
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private async Task<string> GetUserCityCountry(long id)
+        {
+            HttpClient client = new HttpClient();
 
             var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api/User/GetPrimaryUserAddressById" + id);
 
@@ -556,10 +918,9 @@ namespace MemoryManagement.Services
             }
         }
 
-        private async Task<Model.File> GetUserAvatar(long id, string token)
+        private async Task<Model.File> GetUserAvatar(long id)
         {
             HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api/User/" + id);
 
@@ -574,7 +935,7 @@ namespace MemoryManagement.Services
                         Result<User> result = JsonConvert.DeserializeObject<Result<User>>(responseStr);
 
                         if (result.GetData().FileId.HasValue) {
-                            return await GetFile(result.GetData().FileId.Value, token);
+                            return await GetFile(result.GetData().FileId.Value);
                         }
                         else
                         {
@@ -599,10 +960,9 @@ namespace MemoryManagement.Services
         }
 
 
-        private async Task<string> GetUserName(long id, string token)
+        private async Task<string> GetUserName(long id)
         {
             HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api/User/" + id);
 
@@ -636,10 +996,9 @@ namespace MemoryManagement.Services
             }
         }
 
-        private async Task<string> GetFileName(long id, string token)
+        private async Task<string> GetFileName(long id)
         {
             HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api/File/" + id);
 
@@ -681,10 +1040,9 @@ namespace MemoryManagement.Services
             return null;
         }
 
-        private async Task<Model.File> GetFile(long id, string token)
+        private async Task<Model.File> GetFile(long id)
         {
             HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api/File/" + id);
 

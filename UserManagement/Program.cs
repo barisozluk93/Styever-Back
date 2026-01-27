@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using UserManagement.Authorization;
+using UserManagement.BackgroundServices;
 using UserManagement.DbContexts;
 using UserManagement.Interfaces;
 using UserManagement.Model;
@@ -25,9 +26,6 @@ var emailConfig = Configuration
         .GetSection("MailSettings")
         .Get<MailSettings>();
 
-Console.WriteLine(emailConfig);
-Console.WriteLine(Configuration.GetConnectionString("DefaultConnection"));
-
 builder.Services.AddSingleton(emailConfig);
 
 builder.Services.AddDbContext<UserManagementContext>(options =>
@@ -38,6 +36,7 @@ builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddTransient<IAuthService, AuthService>();
 builder.Services.AddTransient<ITokenService, TokenService>();
+builder.Services.AddHostedService<UserDailyWorker>();
 
 builder.Services.AddAuthentication(options =>
 {
@@ -88,6 +87,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-//app.Run("http://localhost:5224");
-app.Run();
+app.Run("http://localhost:5224");
+//app.Run();
 

@@ -1,0 +1,6 @@
+@ContactUsManagement_HostAddress = http://localhost:5007
+
+GET {{ContactUsManagement_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

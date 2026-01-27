@@ -68,7 +68,7 @@ namespace ArticleManagement.Services
                 try
                 {
                     var queryable = await _dbContext.Articles
-                                        .Where(x => !x.IsDeleted && (!string.IsNullOrEmpty(searchTerm) ? (language == "tr" ? x.Header.ToLower().Contains(searchTerm.ToLower()) : x.HeaderEn.ToLower().Contains(searchTerm.ToLower())) : true))
+                                        .Where(x => !x.IsDeleted && (!string.IsNullOrEmpty(searchTerm) ? (language == "tr" ? x.Header.ToLower().Contains(searchTerm.ToLower()) : x.HeaderEn.ToLower().Contains(searchTerm.ToLowerInvariant())) : true))
                                         .Select(s => new Article
                                         {
                                             Header = s.Header,

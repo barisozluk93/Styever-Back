@@ -50,6 +50,7 @@ namespace UserManagement.Services
                             IsTrial = s.IsTrial,
                             Permissions = _dbContext.UserPermissions.Include(p => p.Permission).Where(x => !x.IsDeleted && x.UserId == s.Id).Select(p => p.Permission).ToList(),
                             Roles = _dbContext.UserRoles.Where(x => !x.IsDeleted && x.UserId == s.Id).Select(p => p.RoleId).ToList(),
+                            IsActive = s.IsActive,
                         }).FirstOrDefaultAsync();
 
                     if(user != null)
@@ -65,15 +66,17 @@ namespace UserManagement.Services
                             response.AccessToken = generatedTokenInformation.Token;
                             response.RefreshToken = generatedTokenInformation.RefreshToken;
 
-                            if (user.IsTrial && user.TrialExpirationDate < DateTime.UtcNow)
+                            if (user.IsTrial && !user.IsActive)
                             {
-                                //user.IsTrial = false;
-                                await _dbContext.SaveChangesAsync();
-
                                 response.IsPaymentRequired = true;
                             }
+                            else
+                            {
+                                response.IsPaymentRequired = false;
 
-                            result.SetData(response);
+                            }
+
+                        result.SetData(response);
                             result.SetMessage("İşlem başarı ile gerçekleşti.");
                         }
                         else
@@ -322,6 +325,100 @@ namespace UserManagement.Services
             return result;
         }
 
+        public async Task<Result<User>> RegisterWithVoucher(User user)
+        {
+            var result = new Result<User>();
+
+            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            {
+                try
+                {
+                    var userVoucher = await _dbContext.UserVouchers.Where(x => !x.IsDeleted && x.Voucher == user.Voucher).FirstOrDefaultAsync();
+                    if (userVoucher != null)
+                    {
+                        if (!_dbContext.Users.Where(x => x.Username == user.Username).Any())
+                        {
+                            var hashedPassword = HashPasword(user.Password, out var salt);
+
+                            user.Password = hashedPassword;
+                            user.Salt = salt;
+                            user.CreatedDate = DateTime.UtcNow;
+                            user.ExpirationDate = user.CreatedDate.AddYears(1);
+                            user.TrialExpirationDate = user.CreatedDate.AddDays(7);
+                            user.IsTrial = false;
+                            user.IsDeleted = false;
+                            user.IsActive = true;
+
+                            _dbContext.Users.Add(user);
+                            await _dbContext.SaveChangesAsync();
+
+                            UserRole ur = new UserRole();
+                            ur.RoleId = user.Roles.First();
+                            ur.UserId = user.Id;
+                            ur.IsDeleted = false;
+
+                            _dbContext.Add(ur);
+                            await _dbContext.SaveChangesAsync();
+
+                            var rolePermissions = await _dbContext.RolePermissions.Where(x => x.RoleId == user.Roles.First() && !x.IsDeleted).Select(s => s.PermissionId).ToListAsync();
+                            foreach (var permission in rolePermissions)
+                            {
+                                UserPermission up = new UserPermission();
+                                up.PermissionId = permission;
+                                up.UserId = user.Id;
+                                up.IsDeleted = false;
+
+                                _dbContext.Add(up);
+                                await _dbContext.SaveChangesAsync();
+                            }
+
+                            UserAddress ua = new UserAddress();
+                            ua.Address = user.UserAddress.Address;
+                            ua.AddressHeader = user.UserAddress.AddressHeader;
+                            ua.UserId = user.Id;
+                            ua.IsDeleted = false;
+                            ua.City = user.UserAddress.City;
+                            ua.Country = user.UserAddress.Country;
+                            ua.District = user.UserAddress.District;
+                            ua.IsPrimary = true;
+
+                            _dbContext.Add(ua);
+                            await _dbContext.SaveChangesAsync();
+
+                            userVoucher.IsDeleted = true;
+                            await _dbContext.SaveChangesAsync();
+                            transaction.Commit();
+
+                            result.SetData(user);
+                            result.SetMessage("İşlem başarı ile gerçekleşti.");
+                        }
+                        else
+                        {
+                            result.SetIsSuccess(false);
+                            result.SetMessage("Aynı kullanıcı ismine sahip başka bir kullanıcı bulunmaktadır.");
+                        }
+                    }
+                    else
+                    {
+                        result.SetIsSuccess(false);
+                        result.SetMessage("Böyle bir kupon kodu bulunmamaktadır.");
+                    }
+
+                    return result;
+
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+
+                    result.SetIsSuccess(false);
+                    result.SetMessage(ex.Message);
+                }
+            }
+
+            return result;
+
+        }
         public async Task<Result<User>> Register(User user)
         {
             var result = new Result<User>();
@@ -341,6 +438,7 @@ namespace UserManagement.Services
                         user.TrialExpirationDate = user.CreatedDate.AddDays(7);
                         user.IsTrial = true;
                         user.IsDeleted = false;
+                        user.IsActive = true;
 
                         _dbContext.Users.Add(user);
                         await _dbContext.SaveChangesAsync();

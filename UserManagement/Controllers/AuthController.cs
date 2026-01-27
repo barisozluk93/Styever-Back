@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UserManagement.Authorization;
 using UserManagement.Entity;
 using UserManagement.Interfaces;
 using UserManagement.Model;
@@ -35,6 +36,15 @@ namespace UserManagement.Controllers
             return new OkObjectResult(result);
         }
 
+        [HttpPost("RegisterWithVoucher")]
+        [AllowAnonymous]
+        public async Task<IActionResult> RegisterWithVoucher([FromBody] User user)
+        {
+            var result = await authService.RegisterWithVoucher(user);
+
+            return new OkObjectResult(result);
+        }
+
         [HttpPost("RefreshToken")]
         [AllowAnonymous]
         public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
@@ -64,6 +74,7 @@ namespace UserManagement.Controllers
 
         [HttpPost("ChangePassword")]
         [Authorize]
+        [HasPermission("Profile.ChangePw.Permission")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
             var result = await authService.ChangePassword(request);

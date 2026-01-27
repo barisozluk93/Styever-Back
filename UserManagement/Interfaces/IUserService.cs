@@ -19,7 +19,9 @@ namespace UserManagement.Interfaces
         Task<Result<UserAddress>> UserAddressDelete(long id);
         Task<Result<UserAddress>> GetUserAddressById(long id);
         Task<Result<UserAddress>> GetPrimaryUserAddressById(long userId);
-
-
+        Task<Result<bool>> Pay(long userId);
+        Task<Result<bool>> BuyPackage(long userId, long planId, long memoryId);
+        Task<Result<UserVoucher>> BuyGiftPackage(UserVoucher userVoucher);
+        Task<Result<UserVoucher>> VoucherControl(string voucher);
     }
 }

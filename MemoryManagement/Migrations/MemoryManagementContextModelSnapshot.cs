@@ -105,6 +105,9 @@ namespace MemoryManagement.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
+                    b.Property<bool>("BelongingToOldPackage")
+                        .HasColumnType("boolean");
+
                     b.Property<DateOnly>("BirthDate")
                         .HasColumnType("date");
 
@@ -115,6 +118,9 @@ namespace MemoryManagement.Migrations
                         .HasColumnType("date");
 
                     b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsLinkOnly")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsOpenToComment")
@@ -142,6 +148,39 @@ namespace MemoryManagement.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Memories");
+                });
+
+            modelBuilder.Entity("MemoryManagement.Entity.MemoryCandle", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime?>("Date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double?>("Donation")
+                        .HasColumnType("double precision");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<long>("MemoryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Shelter")
+                        .HasColumnType("text");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemoryId");
+
+                    b.ToTable("MemoryCandles");
                 });
 
             modelBuilder.Entity("MemoryManagement.Entity.MemoryComment", b =>
@@ -228,6 +267,31 @@ namespace MemoryManagement.Migrations
                     b.ToTable("MemoryLikes");
                 });
 
+            modelBuilder.Entity("MemoryManagement.Entity.MemoryYoutubeLink", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Link")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("MemoryId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MemoryId");
+
+                    b.ToTable("MemoryYoutubeLinks");
+                });
+
             modelBuilder.Entity("MemoryManagement.Entity.Memory", b =>
                 {
                     b.HasOne("MemoryManagement.Entity.Category", "Category")
@@ -237,6 +301,17 @@ namespace MemoryManagement.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
+                });
+
+            modelBuilder.Entity("MemoryManagement.Entity.MemoryCandle", b =>
+                {
+                    b.HasOne("MemoryManagement.Entity.Memory", "Memory")
+                        .WithMany()
+                        .HasForeignKey("MemoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Memory");
                 });
 
             modelBuilder.Entity("MemoryManagement.Entity.MemoryComment", b =>
@@ -262,6 +337,17 @@ namespace MemoryManagement.Migrations
                 });
 
             modelBuilder.Entity("MemoryManagement.Entity.MemoryLike", b =>
+                {
+                    b.HasOne("MemoryManagement.Entity.Memory", "Memory")
+                        .WithMany()
+                        .HasForeignKey("MemoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Memory");
+                });
+
+            modelBuilder.Entity("MemoryManagement.Entity.MemoryYoutubeLink", b =>
                 {
                     b.HasOne("MemoryManagement.Entity.Memory", "Memory")
                         .WithMany()

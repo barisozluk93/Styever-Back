@@ -17,6 +17,8 @@ namespace FileManagement.Controllers
         }
 
         [HttpPost("Save")]
+        [Authorize]
+        [HasPermission("File.Save.Permission")]
         public async Task<IActionResult> Save([FromForm] IFormFile file, [FromForm] int type)
         {
             var result = await _fileService.Save(file, type);
@@ -24,6 +26,8 @@ namespace FileManagement.Controllers
         }
 
         [HttpDelete("Delete/{id}")]
+        [Authorize]
+        [HasPermission("File.Delete.Permission")]
         public async Task<IActionResult> Delete(long id)
         {
             var result = await _fileService.Delete(id);

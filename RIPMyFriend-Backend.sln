@@ -3,17 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36518.9
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserManagement", "UserManagement\UserManagement.csproj", "{67A37D55-E930-4ACA-BF6F-5711AE181C97}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserManagement", "UserManagement\UserManagement.csproj", "{67A37D55-E930-4ACA-BF6F-5711AE181C97}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiGateway", "ApiGateway\ApiGateway.csproj", "{056D31DA-F95D-45DC-9F4C-616220DE9E62}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiGateway", "ApiGateway\ApiGateway.csproj", "{056D31DA-F95D-45DC-9F4C-616220DE9E62}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileManagement", "FileManagement\FileManagement.csproj", "{3D72C457-652A-4D19-9B85-E700EB8520E2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileManagement", "FileManagement\FileManagement.csproj", "{3D72C457-652A-4D19-9B85-E700EB8520E2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MemoryManagement", "MemoryManagement\MemoryManagement.csproj", "{38291FD7-DFD9-40BA-8F1A-8F0025F2FD29}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArticleManagement", "ArticleManagement\ArticleManagement.csproj", "{5CCC4B35-32A0-47BC-8BDC-A157730A4667}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FAQManagement", "FAQManagement\FAQManagement.csproj", "{DB441D3E-BC81-4F84-B47E-5BE7996A5E31}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContactUsManagement", "ContactUsManagement\ContactUsManagement.csproj", "{77A154E1-36DD-428C-AC86-4C7BEC4D19F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationManagement", "NotificationManagement\NotificationManagement.csproj", "{3B43FC53-AC60-4DAD-A86C-39BDEDEDABF9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +49,14 @@ Global
 		{DB441D3E-BC81-4F84-B47E-5BE7996A5E31}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB441D3E-BC81-4F84-B47E-5BE7996A5E31}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB441D3E-BC81-4F84-B47E-5BE7996A5E31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{77A154E1-36DD-428C-AC86-4C7BEC4D19F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77A154E1-36DD-428C-AC86-4C7BEC4D19F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77A154E1-36DD-428C-AC86-4C7BEC4D19F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77A154E1-36DD-428C-AC86-4C7BEC4D19F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B43FC53-AC60-4DAD-A86C-39BDEDEDABF9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B43FC53-AC60-4DAD-A86C-39BDEDEDABF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B43FC53-AC60-4DAD-A86C-39BDEDEDABF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B43FC53-AC60-4DAD-A86C-39BDEDEDABF9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

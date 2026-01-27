@@ -2,6 +2,8 @@
 {
     public class PagingParameter
     {
+        public long? UserId { get; set; }
+
         public string? FilterText { get; set; }
         public long? CategoryId { get; set; }
 

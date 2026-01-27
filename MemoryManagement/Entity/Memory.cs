@@ -17,8 +17,17 @@ namespace MemoryManagement.Entity
         public DateOnly DeathDate { get; set; }
         public DateTime PostDate { get; set; }
         public bool IsPrivate { get; set; }
+        public bool IsLinkOnly { get; set; }
+
         public bool IsOpenToComment { get; set; }
         public bool IsDeleted { get; set; }
+        public bool BelongingToOldPackage { get; set; }
+
+        [NotMapped]
+        public List<MemoryCandle>? Candles { get; set; }
+
+        [NotMapped]
+        public long? CandlesCount { get; set; }
 
         [NotMapped]
         public List<MemoryComment>? Comments { get; set; }
@@ -36,12 +45,18 @@ namespace MemoryManagement.Entity
         public List<MemoryFile>? Files { get; set; }
 
         [NotMapped]
+        public List<MemoryYoutubeLink>? YoutubeLinks { get; set; }
+
+        [NotMapped]
         public string? UserName { get; set; }
 
         [NotMapped]
         public Model.File? UserAvatar { get; set; }
         [NotMapped]
         public string? UserCityCountry { get; set; }
+
+        [NotMapped]
+        public bool HasDonation { get; set; }
 
 
     }

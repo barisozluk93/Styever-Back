@@ -1,6 +1,6 @@
 @ApiGateway_HostAddress = http://localhost:5058
 
-GET {{ApiGateway_HostAddress}}/api2/
+GET {{ApiGateway_HostAddress}}/api/
 Accept: application/json
 
 ###

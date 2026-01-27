@@ -15,13 +15,16 @@ namespace MemoryManagement.Model
             public string Name { get; set; }
 
             public string Surname { get; set; }
-        public long? FileId { get; set; }
+            public long? FileId { get; set; }
 
-        public string Email { get; set; }
+            public string Email { get; set; }
 
             public string Phone { get; set; }
 
             public bool IsDeleted { get; set; }
             public bool IsSystemData { get; set; }
-        }
+            public bool IsTrial { get; set; }
+            public DateTime TrialExpirationDate { get; set; }
+
+    }
 }

@@ -19,6 +19,8 @@ namespace UserManagement.Controllers
         }
 
         [HttpGet("Paginate")]
+        [Authorize]
+        [HasPermission("UserScene.Paging.Permission")]
 
         public async Task<IActionResult> Paginate([FromQuery] PagingParameter pagingParameter)
         {
@@ -27,7 +29,8 @@ namespace UserManagement.Controllers
         }
 
         [HttpGet("All")]
-
+        [Authorize]
+        [HasPermission("UserScene.List.Permission")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _userService.GetUsers();
@@ -35,7 +38,8 @@ namespace UserManagement.Controllers
         }
 
         [HttpPost("Save")]
-
+        [Authorize]
+        [HasPermission("UserScene.Save.Permission")]
         public async Task<IActionResult> Save([FromBody] User user)
         {
             var result = await _userService.Save(user);
@@ -43,23 +47,17 @@ namespace UserManagement.Controllers
         }
 
         [HttpPost("Update")]
-
+        [Authorize]
+        [HasPermission("UserScene.Edit.Permission")]
         public async Task<IActionResult> Update([FromBody] User user)
         {
             var result = await _userService.Update(user);
             return new OkObjectResult(result);
         }
 
-        [HttpPost("UserProfileEdit")]
-
-        public async Task<IActionResult> UserProfileEdit([FromBody] User user)
-        {
-            var result = await _userService.Update(user);
-            return new OkObjectResult(result);
-        }
-
         [HttpDelete("Delete/{id}")]
-
+        [Authorize]
+        [HasPermission("UserScene.Delete.Permission")]
         public async Task<IActionResult> Delete(long id)
         {
             var result = await _userService.Delete(id);
@@ -75,8 +73,53 @@ namespace UserManagement.Controllers
             return new OkObjectResult(result);
         }
 
-        [HttpGet("UserAvatarUpdate/{id}/{fileId}")]
+        [HttpGet("Pay/{id}")]
+        [Authorize]
+        [HasPermission("PaymentScene.MembershipPayment.Permission")]
 
+        public async Task<IActionResult> Pay(long id)
+        {
+            var result = await _userService.Pay(id);
+            return new OkObjectResult(result);
+        }
+
+        [HttpGet("BuyPackage/{id}/{planId}/{memoryId}")]
+        [Authorize]
+        [HasPermission("PaymentScene.BuyMembership.Permission")]
+        public async Task<IActionResult> BuyPackage(long id, long planId, long memoryId)
+        {
+            var result = await _userService.BuyPackage(id, planId, memoryId);
+            return new OkObjectResult(result);
+        }
+
+        [HttpPost("BuyGiftPackage")]
+
+        public async Task<IActionResult> BuyGiftPackage([FromBody] UserVoucher userVoucher)
+        {
+            var result = await _userService.BuyGiftPackage(userVoucher);
+            return new OkObjectResult(result);
+        }
+
+        [HttpGet("VoucherControl/{voucher}")]
+
+        public async Task<IActionResult> VoucherControl(string voucher)
+        {
+            var result = await _userService.VoucherControl(voucher);
+            return new OkObjectResult(result);
+        }
+
+        [HttpPost("UserProfileEdit")]
+        [Authorize]
+        [HasPermission("ProfileScene.Edit.Permission")]
+        public async Task<IActionResult> UserProfileEdit([FromBody] User user)
+        {
+            var result = await _userService.Update(user);
+            return new OkObjectResult(result);
+        }
+
+        [HttpGet("UserAvatarUpdate/{id}/{fileId}")]
+        [Authorize]
+        [HasPermission("ProfileScene.Edit.Permission")]
         public async Task<IActionResult> UserAvatarUpdate(long id, long fileId)
         {
             var result = await _userService.UserAvatarUpdate(id, fileId);
@@ -84,8 +127,7 @@ namespace UserManagement.Controllers
         }
 
         [HttpGet("GetUserPermissions")]
-        
-
+        [Authorize]
         public async Task<IActionResult> GetUserPermissions()
         {
             var token = Request.Headers["Authorization"].FirstOrDefault()?.Split(' ').Last();
@@ -95,8 +137,8 @@ namespace UserManagement.Controllers
         }
 
         [HttpGet("UserAddressList/{userId}")]
-        
-
+        [Authorize]
+        [HasPermission("ProfileScene.ListAddress.Permission")]
         public async Task<IActionResult> GetUserAddresses(long userId)
         {
             var result = await _userService.GetUserAddresses(userId);
@@ -104,8 +146,8 @@ namespace UserManagement.Controllers
         }
 
         [HttpPost("UserAddressSave")]
-        
-
+        [Authorize]
+        [HasPermission("ProfileScene.SaveAddress.Permission")]
         public async Task<IActionResult> UserAddressSave([FromBody] UserAddress userAddress)
         {
             var result = await _userService.UserAddressSave(userAddress);
@@ -113,8 +155,8 @@ namespace UserManagement.Controllers
         }
 
         [HttpPost("UserAddressUpdate")]
-        
-
+        [Authorize]
+        [HasPermission("ProfileScene.EditAddress.Permission")]
         public async Task<IActionResult> UserAddressUpdate([FromBody] UserAddress userAddress)
         {
             var result = await _userService.UserAddressUpdate(userAddress);
@@ -122,8 +164,8 @@ namespace UserManagement.Controllers
         }
 
         [HttpDelete("UserAddressDelete/{id}")]
-        
-
+        [Authorize]
+        [HasPermission("ProfileScene.DeleteAddress.Permission")]
         public async Task<IActionResult> UserAddressDelete(long id)
         {
             var result = await _userService.UserAddressDelete(id);
@@ -131,8 +173,8 @@ namespace UserManagement.Controllers
         }
 
         [HttpGet("UserAddressById/{id}")]
-        
-
+        [Authorize]
+        [HasPermission("ProfileScene.GetAddressById.Permission")]
         public async Task<IActionResult> GetUserAddressById(long id)
         {
             var result = await _userService.GetUserAddressById(id);
@@ -141,7 +183,6 @@ namespace UserManagement.Controllers
 
         [HttpGet("GetPrimaryUserAddressById/{userId}")]
         
-
         public async Task<IActionResult> GetPrimaryUserAddressById(long userId)
         {
             var result = await _userService.GetPrimaryUserAddressById(userId);

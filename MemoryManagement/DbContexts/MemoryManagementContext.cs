@@ -16,8 +16,9 @@ namespace MemoryManagement.DbContexts
         public DbSet<Memory> Memories { get; set; }
         public DbSet<MemoryComment> MemoryComments { get; set; }
         public DbSet<MemoryLike> MemoryLikes { get; set; }
-
         public DbSet<MemoryFile> MemoryFiles { get; set; }
+        public DbSet<MemoryYoutubeLink> MemoryYoutubeLinks { get; set; }
+        public DbSet<MemoryCandle> MemoryCandles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

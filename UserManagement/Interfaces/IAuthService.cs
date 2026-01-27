@@ -11,8 +11,8 @@ namespace UserManagement.Interfaces
         Task<Result<string>> ForgotPassword(ForgotPasswordRequest request);
         Task<Result<bool>> ResetPassword(ResetPasswordRequest request);
         Task<Result<bool>> ChangePassword(ChangePasswordRequest request);
-
         Task<Result<User>> Register(User user);
+        Task<Result<User>> RegisterWithVoucher(User user);
 
     }
 }

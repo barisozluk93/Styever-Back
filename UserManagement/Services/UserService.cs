@@ -1,7 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MailKit.Net.Smtp;
+using MailKit.Security;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using MimeKit;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
@@ -13,6 +17,7 @@ using UserManagement.DbContexts;
 using UserManagement.Entity;
 using UserManagement.Interfaces;
 using UserManagement.Model;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace UserManagement.Services
 {
@@ -26,11 +31,13 @@ namespace UserManagement.Services
 
         private readonly IConfiguration configuration;
 
+        private readonly MailSettings _mailSettings;
 
-        public UserService(UserManagementContext dbContext, IConfiguration configuration)
+        public UserService(UserManagementContext dbContext, IConfiguration configuration, MailSettings mailSettings)
         {
             _dbContext = dbContext;
             this.configuration = configuration;
+            _mailSettings = mailSettings;
         }
 
         public async Task<Result<PagingResult<PagedList<User>>>> Paginate(PagingParameter pagingParameter)
@@ -44,7 +51,7 @@ namespace UserManagement.Services
                 try
                 {
                     var queryable = _dbContext.Users
-                        .Where(x => (String.IsNullOrEmpty(lowerFilterText) || (x.Name.ToLower().Contains(lowerFilterText)) || x.Surname.ToLower().Contains(lowerFilterText)))
+                        .Where(x => (string.IsNullOrEmpty(lowerFilterText) || (x.Name.ToLower().Contains(lowerFilterText)) || x.Surname.ToLower().Contains(lowerFilterText)))
                         .Select(s => new User()
                     {
                         Id = s.Id,
@@ -73,6 +80,205 @@ namespace UserManagement.Services
                 {
                     result.SetIsSuccess(false);
                     result.SetMessage(ex.Message);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<Result<bool>> BuyPackage(long userId, long planId, long memoryId)
+        {
+            var result = new Result<bool>();
+
+            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            {
+                try
+                {
+                    var res = true;
+
+                    if (memoryId > 0)
+                    {
+                        await ChangeBelongingIssuesUserMemory(userId, memoryId);
+                    }
+
+                    if (res)
+                    {
+                        var user = await _dbContext.Users.Where(x => x.Id == userId).FirstOrDefaultAsync();
+                        user.IsActive = true;
+                        user.CreatedDate = DateTime.UtcNow;
+                        user.ExpirationDate = DateTime.UtcNow.AddYears(1);
+
+                        var userRole = await _dbContext.UserRoles.Where(x => x.UserId == userId).FirstOrDefaultAsync();
+                        userRole.RoleId = planId;
+
+                        UserPayment payment = new UserPayment();
+                        payment.UserId = userId;
+                        payment.Price = planId == 2 ? 359.00 : planId == 3 ? 559.00 : 959.00;
+                        payment.PlanId = planId;
+                        payment.PaymentDate = DateTime.UtcNow;
+                        payment.IsDeleted = false;
+
+                        _dbContext.Add(payment);
+                        await _dbContext.SaveChangesAsync();
+
+                        transaction.Commit();
+
+                        result.SetData(true);
+                        result.SetMessage("İşlem başarı ile gerçekleşti.");
+                    }
+                    else
+                    {
+                        result.SetIsSuccess(false);
+                        result.SetMessage("İşlem sırasında bir hata oluştu.");
+                    }
+                }
+                catch (Exception exception)
+                {
+                    transaction.Rollback();
+
+                    result.SetIsSuccess(false);
+                    result.SetMessage(exception.Message);
+                }
+            }
+
+            return result;
+        }
+
+        private async Task SendGiftMessage(UserVoucher userVoucher, User? user, string link)
+        {
+            string message = string.Empty;
+            if(user != null)
+            {
+                message += user.Name + " " + user.Surname + ", en yakın dostunuzu anmak için size bir hediye gönderdi.\n\n" + userVoucher.Message + "\n\n" + 
+                    "Styever' a hemen kayıt olup en yakın dostunuz ile olan anılarınızı paylaşabilirsiniz.\n" + 
+                    "Kupon Kodunuz : " + userVoucher.Voucher + "\n" + link + "\n\n" + "Sevgilerimizle,\nStyever Ekibi";
+            }
+            else
+            {
+                message += userVoucher.SenderEmail + ", en yakın dostunuzu anmak için size bir hediye gönderdi.\n\n" + userVoucher.Message + "\n\n" +
+                    "Styever' a hemen kayıt olup en yakın dostunuz ile olan anılarınızı paylaşabilirsiniz.\n" +
+                    "Kupon Kodunuz : " + userVoucher.Voucher + "\n" + link + "\n\n" + "Sevgilerimizle,\nStyever Ekibi";
+            }
+
+            var emailMessage = new MimeMessage();
+            emailMessage.Sender = MailboxAddress.Parse(_mailSettings.Mail);
+            emailMessage.From.Add(MailboxAddress.Parse(_mailSettings.Mail));
+            emailMessage.To.Add(MailboxAddress.Parse(userVoucher.ReceiverEmail));
+            emailMessage.Subject = "Styever - Bir hediyeniz var!";
+            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text =  message };
+
+            using var smtp = new SmtpClient();
+            smtp.Connect(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.SslOnConnect);
+            smtp.Authenticate(_mailSettings.Mail, _mailSettings.Password);
+            await smtp.SendAsync(emailMessage);
+            smtp.Disconnect(true);
+        }
+
+        public async Task<Result<UserVoucher>> VoucherControl(string voucher)
+        {
+            var result = new Result<UserVoucher>();
+
+            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            {
+                try
+                {
+                    var userVoucher = await _dbContext.UserVouchers.Where(x => !x.IsDeleted && x.Voucher == Guid.Parse(voucher)).FirstOrDefaultAsync();
+                    result.SetData(userVoucher);
+                    result.SetMessage("İşlem başarı ile gerçekleşti.");
+
+                }
+                catch (Exception ex)
+                {
+                    result.SetIsSuccess(false);
+                    result.SetMessage(ex.Message);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<Result<UserVoucher>> BuyGiftPackage(UserVoucher userVoucher)
+        {
+            var result = new Result<UserVoucher>();
+
+            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            {
+                try
+                {
+                    userVoucher.Date = DateTime.UtcNow;
+                    userVoucher.Voucher = Guid.NewGuid();
+                    userVoucher.IsDeleted = false;
+
+                    _dbContext.Add(userVoucher);
+                    await _dbContext.SaveChangesAsync();
+                    transaction.Commit();
+
+                    result.SetData(userVoucher);
+                    result.SetMessage("İşlem başarı ile gerçekleşti.");
+
+                    //await SendGiftMessage(userVoucher, userVoucher.UserId.HasValue ? _dbContext.Users.Where(x => x.Id == userVoucher.UserId).FirstOrDefault() : null, "http://localhost:4200/#/auth/registration");
+                    await SendGiftMessage(userVoucher, userVoucher.UserId.HasValue ? _dbContext.Users.Where(x => x.Id == userVoucher.UserId).FirstOrDefault() : null, "https://styever.com/#/auth/registration");
+                }
+                catch (Exception exception)
+                {
+                    transaction.Rollback();
+
+                    result.SetIsSuccess(false);
+                    result.SetMessage(exception.Message);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<Result<bool>> Pay(long userId)
+        {
+            var result = new Result<bool>();
+
+            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            {
+                try
+                {
+                    var res = await ActivateUserMemories(userId);
+
+                    if (res)
+                    {
+                        var user = await _dbContext.Users.Where(x => x.Id == userId).FirstOrDefaultAsync();
+                        user.Roles = await _dbContext.UserRoles.Where(x => x.UserId == userId).Select(s => s.RoleId).ToListAsync();
+
+                        if (user.IsTrial)
+                        {
+                            user.IsTrial = false;
+                            user.IsActive = true;
+                        }
+
+                        UserPayment payment = new UserPayment();
+                        payment.UserId = userId;
+                        payment.Price = user.Roles.First() == 2 ? 359.00 : user.Roles.First() == 3 ? 559.00 : 959.00;
+                        payment.PlanId = user.Roles.First();
+                        payment.PaymentDate = DateTime.UtcNow;
+                        payment.IsDeleted = false;
+
+                        _dbContext.Add(payment);
+                        await _dbContext.SaveChangesAsync();
+                        transaction.Commit();
+
+                        result.SetData(true);
+                        result.SetMessage("İşlem başarı ile gerçekleşti.");
+                    }
+                    else
+                    {
+                        result.SetIsSuccess(false);
+                        result.SetMessage("İşlem sırasında hata oluştu.");
+                    }
+                        
+                }
+                catch (Exception exception)
+                {
+                    transaction.Rollback();
+
+                    result.SetIsSuccess(false);
+                    result.SetMessage(exception.Message);
                 }
             }
 
@@ -527,9 +733,9 @@ namespace UserManagement.Services
             return result;
         }
 
-        public async Task<Result<List<String>>> GetUserPermissions(string token)
+        public async Task<Result<List<string>>> GetUserPermissions(string token)
         {
-            var result = new Result<List<String>>();
+            var result = new Result<List<string>>();
 
             using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
             {
@@ -704,6 +910,94 @@ namespace UserManagement.Services
             }
 
             return null;
+        }
+
+        private async Task<bool> ActivateUserMemories(long id)
+        {
+            HttpClient client = new HttpClient();
+
+            var response = await client.GetAsync(configuration["AppSettings:ApiUrl"] + "/api/Memory/ActivateUserMemories/" + id);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseStr = await response.Content.ReadAsStringAsync();
+
+                if (!string.IsNullOrEmpty(responseStr))
+                {
+                    try
+                    {
+                        Result<bool> result = JsonConvert.DeserializeObject<Result<bool>>(responseStr);
+
+                        if (result != null)
+                        {
+                            return result.GetData();
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        return false;
+                    }
+
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+
+            return false;
+        }
+
+        private async Task<bool> ChangeBelongingIssuesUserMemory(long id, long memoryId)
+        {
+            HttpClient client = new HttpClient();
+
+            var response = await client.GetAsync(configuration["AppSettings:ApiUrl"] + "/api/Memory/ChangeBelongingIssuesUserMemory/" + id + "/" + memoryId);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseStr = await response.Content.ReadAsStringAsync();
+
+                if (!string.IsNullOrEmpty(responseStr))
+                {
+                    try
+                    {
+                        Result<bool> result = JsonConvert.DeserializeObject<Result<bool>>(responseStr);
+
+                        if (result != null)
+                        {
+                            return result.GetData();
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        return false;
+                    }
+
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+
+            return false;
         }
 
     }
