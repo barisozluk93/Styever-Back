@@ -105,8 +105,8 @@ namespace MemoryManagement.Services
 
                         memory.Comments = await _dbContext.MemoryComments.Where(x => x.MemoryId == id && !x.IsDeleted).ToListAsync();
                         memory.CommentsCount = await _dbContext.MemoryComments.Where(x => x.MemoryId == id && !x.IsDeleted).CountAsync();
-                        memory.Comments.ForEach(x => x.UserName = GetUserName(x.UserId).Result);
-                        memory.Comments.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId).Result);
+                        memory.Comments.ForEach(x => x.UserName = x.UserId.HasValue ? GetUserName(x.UserId.Value).Result : null);
+                        memory.Comments.ForEach(x => x.UserAvatar = x.UserId.HasValue ? GetUserAvatar(x.UserId.Value).Result : null);
 
                         memory.Likes = await _dbContext.MemoryLikes.Where(x => x.MemoryId == id && !x.IsDeleted).ToListAsync();
                         memory.LikesCount = await _dbContext.MemoryLikes.Where(x => x.MemoryId == id && !x.IsDeleted).CountAsync();
@@ -253,6 +253,7 @@ namespace MemoryManagement.Services
             {
                 try
                 {
+
                     string lowerFilterText = string.IsNullOrEmpty(pagingParameter.FilterText) ? null : pagingParameter.FilterText.ToLowerInvariant();
                     IQueryable<Memory> queryable;
 
@@ -326,8 +327,8 @@ namespace MemoryManagement.Services
                     pagination.ForEach(x => x.UserCityCountry = GetUserCityCountry(x.UserId).Result);
                     pagination.ForEach(x => x.Candles.ForEach(y => y.UserName = GetUserName(y.UserId).Result));
                     pagination.ForEach(x => x.Candles.ForEach(y => y.UserAvatar = GetUserAvatar(y.UserId).Result));
-                    pagination.ForEach(x => x.Comments.ForEach(y => y.UserName = GetUserName(y.UserId).Result));
-                    pagination.ForEach(x => x.Comments.ForEach(y => y.UserAvatar = GetUserAvatar(y.UserId).Result));
+                    pagination.ForEach(x => x.Comments.ForEach(y => y.UserName = y.UserId.HasValue ? GetUserName(y.UserId.Value).Result : null));
+                    pagination.ForEach(x => x.Comments.ForEach(y => y.UserAvatar = y.UserId.HasValue ? GetUserAvatar(y.UserId.Value).Result : null));
                     pagination.ForEach(x => x.Likes.ForEach(y => y.UserName = GetUserName(y.UserId).Result));
                     pagination.ForEach(x => x.Likes.ForEach(y => y.UserAvatar = GetUserAvatar(y.UserId).Result));
 
@@ -612,11 +613,13 @@ namespace MemoryManagement.Services
                                             Id = s.Id,
                                             IsDeleted = s.IsDeleted,
                                             UserId = s.UserId,
-                                            MemoryId = memoryId
+                                            MemoryId = memoryId,
+                                            IsApproved = s.IsApproved,
+                                            NameSurname = s.NameSurname
                                         }).ToListAsync();
 
-                    queryable.ForEach(x => x.UserName = GetUserName(x.UserId).Result);
-                    queryable.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId).Result);
+                    queryable.ForEach(x => x.UserName = x.UserId.HasValue ? GetUserName(x.UserId.Value).Result : null);
+                    queryable.ForEach(x => x.UserAvatar = x.UserId.HasValue ? GetUserAvatar(x.UserId.Value).Result : null);
                     
                     result.SetData(queryable);
                     result.SetMessage("İşlem başarı ile gerçekleşti.");
@@ -675,6 +678,35 @@ namespace MemoryManagement.Services
                 {
                     memoryComment.Date = DateTime.UtcNow;
                     _dbContext.MemoryComments.Add(memoryComment);
+                    await _dbContext.SaveChangesAsync();
+                    transaction.Commit();
+
+                    result.SetData(memoryComment);
+                    result.SetMessage("İşlem başarı ile gerçekleşti.");
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+
+                    result.SetIsSuccess(false);
+                    result.SetMessage(ex.Message);
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<Result<MemoryComment>> ApproveComment(long id)
+        {
+            var result = new Result<MemoryComment>();
+
+            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            {
+                try
+                {
+                    var memoryComment = await _dbContext.MemoryComments.Where(x => x.Id == id).FirstOrDefaultAsync();
+
+                    memoryComment.IsApproved = true;
                     await _dbContext.SaveChangesAsync();
                     transaction.Commit();
 

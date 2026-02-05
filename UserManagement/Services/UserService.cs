@@ -149,22 +149,32 @@ namespace UserManagement.Services
             string message = string.Empty;
             if(user != null)
             {
-                message += user.Name + " " + user.Surname + ", en yakın dostunuzu anmak için size bir hediye gönderdi.\n\n" + userVoucher.Message + "\n\n" + 
-                    "Styever' a hemen kayıt olup en yakın dostunuz ile olan anılarınızı paylaşabilirsiniz.\n" + 
-                    "Kupon Kodunuz : " + userVoucher.Voucher + "\n" + link + "\n\n" + "Sevgilerimizle,\nStyever Ekibi";
+                message += "Merhaba,\n" + user.Name + " " + user.Surname + " senin için anlamlı bir hediye gönderdi.\n\n" + userVoucher.Message + "\n\n" +
+                    "Bu hediye ile, sevgiyle anılan özel bir can için anı sayfası oluşturabilirsin.\n" +
+                    "Anı sayfanı oluşturmak için aşağıdaki bağlantıya tıklaman ve kupon kodunu girmen yeterli.\n" +
+                    "https://styever.com/#/auth/registration/" +
+                    "Kupon Kodunuz : " + userVoucher.Voucher + "\n" + link + "\n" +
+                    "Bu kupon kodu yalnızca sana özeldir ve bağlantı üzerinden kullanılabilir.\n" +
+                    "Bir anıyı yaşatmanın en güzel yollarından biri olduğuna inanıyoruz.\n" +
+                    "Umarız sana biraz olsun iyi hissettirir.\nSevgiler,\nStyever Ekibi";
             }
             else
             {
-                message += userVoucher.SenderEmail + ", en yakın dostunuzu anmak için size bir hediye gönderdi.\n\n" + userVoucher.Message + "\n\n" +
-                    "Styever' a hemen kayıt olup en yakın dostunuz ile olan anılarınızı paylaşabilirsiniz.\n" +
-                    "Kupon Kodunuz : " + userVoucher.Voucher + "\n" + link + "\n\n" + "Sevgilerimizle,\nStyever Ekibi";
+                message += "Merhaba,\n" + userVoucher.SenderEmail + ", senin için anlamlı bir hediye gönderdi.\n\n" + userVoucher.Message + "\n\n" +
+                    "Bu hediye ile, sevgiyle anılan özel bir can için anı sayfası oluşturabilirsin.\n" +
+                    "Anı sayfanı oluşturmak için aşağıdaki bağlantıya tıklaman ve kupon kodunu girmen yeterli.\n" +
+                    "https://styever.com/#/auth/registration/" +
+                    "Kupon Kodunuz : " + userVoucher.Voucher + "\n" + link + "\n" +
+                    "Bu kupon kodu yalnızca sana özeldir ve bağlantı üzerinden kullanılabilir.\n" +
+                    "Bir anıyı yaşatmanın en güzel yollarından biri olduğuna inanıyoruz.\n" + 
+                    "Umarız sana biraz olsun iyi hissettirir.\nSevgiler,\nStyever Ekibi";
             }
 
             var emailMessage = new MimeMessage();
             emailMessage.Sender = MailboxAddress.Parse(_mailSettings.Mail);
             emailMessage.From.Add(MailboxAddress.Parse(_mailSettings.Mail));
             emailMessage.To.Add(MailboxAddress.Parse(userVoucher.ReceiverEmail));
-            emailMessage.Subject = "Styever - Bir hediyeniz var!";
+            emailMessage.Subject = "Senin İçin Anlamlı Bir Hediye Var";
             emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text =  message };
 
             using var smtp = new SmtpClient();

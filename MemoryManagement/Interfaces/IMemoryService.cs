@@ -11,6 +11,7 @@ namespace MemoryManagement.Interfaces
         Task<Result<Memory>> Update(Memory memory);
         Task<Result<Memory>> GetById(long id);
         Task<Result<MemoryComment>> AddComment(MemoryComment memoryComment);
+        Task<Result<MemoryComment>> ApproveComment(long id);
         Task<Result<MemoryComment>> DeleteComment(long commentId);
         Task<Result<MemoryLike>> Like(MemoryLike memoryLike);
         Task<Result<MemoryLike>> Dislike(long memoryId, long userId);

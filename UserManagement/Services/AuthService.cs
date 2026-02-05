@@ -46,6 +46,8 @@ namespace UserManagement.Services
                             Salt = s.Salt,
                             Email = s.Email,
                             Phone = s.Phone,
+                            ExpirationDate = s.ExpirationDate,
+                            CreatedDate = s.CreatedDate,
                             TrialExpirationDate = s.TrialExpirationDate,
                             IsTrial = s.IsTrial,
                             Permissions = _dbContext.UserPermissions.Include(p => p.Permission).Where(x => !x.IsDeleted && x.UserId == s.Id).Select(p => p.Permission).ToList(),
@@ -139,8 +141,13 @@ namespace UserManagement.Services
                            Salt = s.Salt,
                            Email = s.Email,
                            Phone = s.Phone,
+                           ExpirationDate = s.ExpirationDate,
+                           CreatedDate = s.CreatedDate,
+                           TrialExpirationDate = s.TrialExpirationDate,
+                           IsTrial = s.IsTrial,
                            Permissions = _dbContext.UserPermissions.Include(p => p.Permission).Where(x => !x.IsDeleted && x.UserId == s.Id).Select(p => p.Permission).ToList(),
                            Roles = _dbContext.UserRoles.Where(x => !x.IsDeleted && x.UserId == s.Id).Select(p => p.RoleId).ToList(),
+                           IsActive = s.IsActive,
                        }).FirstOrDefaultAsync();
 
                         var generatedTokenInformation = await tokenService.GenerateToken(new GenerateTokenRequest { User = user });
@@ -508,8 +515,8 @@ namespace UserManagement.Services
             emailMessage.Sender = MailboxAddress.Parse(_mailSettings.Mail);
             emailMessage.From.Add(MailboxAddress.Parse(_mailSettings.Mail));
             emailMessage.To.Add(MailboxAddress.Parse(email));
-            emailMessage.Subject = "Reset Password Link";
-            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = "Şifrenizi sıfırlamak için lütfen aşağıdaki linke tıklayınız.\n" + link};
+            emailMessage.Subject = "Şifre Sıfırlama Talebi";
+            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text = "Merhaba,\nHesabınız için bir şifre sıfırlama talebi aldık.\n Yeni şifrenizi belirlemek için lütfen aşağıdaki bağlantıya tıklayınız.\n" + link + "\nEğer bu talebi siz yapmadıysanız, bu e-postayı dikkate almayabilirsiniz.\n\nSevgiler,\nStyever Ekibi"};
 
             using var smtp = new SmtpClient();
             smtp.Connect(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.SslOnConnect);

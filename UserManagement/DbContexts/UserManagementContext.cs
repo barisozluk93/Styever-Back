@@ -63,7 +63,9 @@ namespace UserManagement.DbContexts
                 new Permission { Id = 38, Name = "Hatıra Ekranı Yorum Yapma Yetkisi", Code = "MemoryScene.AddComment.Permission", IsDeleted = false, IsSystemData = true },
                 new Permission { Id = 39, Name = "Hatıra Ekranı Yorum Silme Yetkisi", Code = "MemoryScene.DeleteComment.Permission", IsDeleted = false, IsSystemData = true },
                 new Permission { Id = 40, Name = "Hatıra Ekranı Beğeni Yetkisi", Code = "MemoryScene.Like.Permission", IsDeleted = false, IsSystemData = true },
-                new Permission { Id = 41, Name = "Hatıra Ekranı Beğeni Silme Yetkisi", Code = "MemoryScene.Dislike.Permission", IsDeleted = false, IsSystemData = true }
+                new Permission { Id = 41, Name = "Hatıra Ekranı Beğeni Silme Yetkisi", Code = "MemoryScene.Dislike.Permission", IsDeleted = false, IsSystemData = true },
+                new Permission { Id = 42, Name = "Hatıra Ekranı Yorum Onaylama Yetkisi", Code = "MemoryScene.ApproveComment.Permission", IsDeleted = false, IsSystemData = true }
+
              );
 
 
@@ -242,7 +244,12 @@ namespace UserManagement.DbContexts
                 new RolePermission { Id = 161, RoleId = 4, PermissionId = 38, IsDeleted = false },
                 new RolePermission { Id = 162, RoleId = 4, PermissionId = 39, IsDeleted = false },
                 new RolePermission { Id = 163, RoleId = 4, PermissionId = 40, IsDeleted = false },
-                new RolePermission { Id = 164, RoleId = 4, PermissionId = 41, IsDeleted = false }
+                new RolePermission { Id = 164, RoleId = 4, PermissionId = 41, IsDeleted = false },
+                new RolePermission { Id = 165, RoleId = 1, PermissionId = 42, IsDeleted = false },
+                new RolePermission { Id = 166, RoleId = 2, PermissionId = 42, IsDeleted = false },
+                new RolePermission { Id = 167, RoleId = 3, PermissionId = 42, IsDeleted = false },
+                new RolePermission { Id = 168, RoleId = 4, PermissionId = 42, IsDeleted = false }
+
             );
 
             modelBuilder.Entity<User>().HasData(
@@ -526,7 +533,11 @@ namespace UserManagement.DbContexts
                 new UserPermission { Id = 161, UserId = 4, PermissionId = 38, IsDeleted = false },
                 new UserPermission { Id = 162, UserId = 4, PermissionId = 39, IsDeleted = false },
                 new UserPermission { Id = 163, UserId = 4, PermissionId = 40, IsDeleted = false },
-                new UserPermission { Id = 164, UserId = 4, PermissionId = 41, IsDeleted = false }
+                new UserPermission { Id = 164, UserId = 4, PermissionId = 41, IsDeleted = false },
+                new UserPermission { Id = 165, UserId = 1, PermissionId = 42, IsDeleted = false },
+                new UserPermission { Id = 166, UserId = 2, PermissionId = 42, IsDeleted = false },
+                new UserPermission { Id = 167, UserId = 3, PermissionId = 42, IsDeleted = false },
+                new UserPermission { Id = 168, UserId = 4, PermissionId = 42, IsDeleted = false }
             );
         }
 

@@ -14,11 +14,14 @@ namespace MemoryManagement.Entity
         [ForeignKey("MemoryId")]
         public Memory? Memory { get; set; }
 
-        public long UserId { get; set; }
+        public long? UserId { get; set; }
+
+        public string? NameSurname { get; set; }
 
         public DateTime? Date { get; set; }
 
         public bool IsDeleted { get; set; }
+        public bool IsApproved { get; set; }
 
         [NotMapped]
         public string? UserName { get; set; }

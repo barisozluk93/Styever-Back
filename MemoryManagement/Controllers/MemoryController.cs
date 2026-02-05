@@ -133,11 +133,18 @@ namespace MemoryManagement.Controllers
         }
 
         [HttpPost("AddComment")]
-        [Authorize]
-        [HasPermission("MemoryScene.AddComment.Permission")]
         public async Task<IActionResult> AddComment([FromBody] MemoryComment memoryComment)
         {
             var result = await _memoryService.AddComment(memoryComment);
+            return new OkObjectResult(result);
+        }
+
+        [HttpGet("ApproveComment/{id}")]
+        [Authorize]
+        [HasPermission("MemoryScene.ApproveComment.Permission")]
+        public async Task<IActionResult> ApproveComment(long id)
+        {
+            var result = await _memoryService.ApproveComment(id);
             return new OkObjectResult(result);
         }
 
