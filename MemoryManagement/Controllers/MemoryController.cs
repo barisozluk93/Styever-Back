@@ -45,10 +45,17 @@ namespace MemoryManagement.Controllers
             return new OkObjectResult(result);
         }
 
-        [HttpGet("ChangeBelongingIssuesUserMemory/{userId}/{memoryId}")]
-        public async Task<IActionResult> ChangeBelongingIssuesUserMemory(long userId, long memoryId)
+        [HttpGet("SetBelongingIssuesToTrueUserMemory/{userId}/{memoryId}")]
+        public async Task<IActionResult> SetBelongingIssuesToTrueUserMemory(long userId, long memoryId)
         {
-            var result = await _memoryService.ChangeBelongingIssuesUserMemory(userId, memoryId);
+            var result = await _memoryService.SetBelongingIssuesToTrueUserMemory(userId, memoryId);
+            return new OkObjectResult(result);
+        }
+
+        [HttpGet("SetBelongingIssuesToFalseUserMemory/{userId}")]
+        public async Task<IActionResult> SetBelongingIssuesToFalseUserMemory(long userId)
+        {
+            var result = await _memoryService.SetBelongingIssuesToFalseUserMemory(userId);
             return new OkObjectResult(result);
         }
 
@@ -108,8 +115,8 @@ namespace MemoryManagement.Controllers
         }
 
         [HttpPost("LightCandle")]
-        [Authorize]
-        [HasPermission("MemoryScene.LightCandle.Permission")]
+        //[Authorize]
+        //[HasPermission("MemoryScene.LightCandle.Permission")]
         public async Task<IActionResult> LightCandle([FromBody] MemoryCandle memoryCandle)
         {
             var result = await _memoryService.LightCandle(memoryCandle);
@@ -117,8 +124,8 @@ namespace MemoryManagement.Controllers
         }
 
         [HttpPost("UpdateCandle")]
-        [Authorize]
-        [HasPermission("MemoryScene.UpdateCandle.Permission")]
+        //[Authorize]
+        //[HasPermission("MemoryScene.UpdateCandle.Permission")]
         public async Task<IActionResult> UpdateCandle([FromBody] MemoryCandle memoryCandle)
         {
             var result = await _memoryService.UpdateCandle(memoryCandle);

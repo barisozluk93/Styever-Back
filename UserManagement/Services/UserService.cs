@@ -98,7 +98,12 @@ namespace UserManagement.Services
 
                     if (memoryId > 0)
                     {
-                        await ChangeBelongingIssuesUserMemory(userId, memoryId);
+                        await SetBelongingIssuesToTrueUserMemory(userId, memoryId);
+                    }
+
+                    if(planId == 4)
+                    {
+                        await SetBelongingIssuesToFalseUserMemory(userId);
                     }
 
                     if (res)
@@ -152,8 +157,8 @@ namespace UserManagement.Services
                 message += "Merhaba,\n" + user.Name + " " + user.Surname + " senin için anlamlı bir hediye gönderdi.\n\n" + userVoucher.Message + "\n\n" +
                     "Bu hediye ile, sevgiyle anılan özel bir can için anı sayfası oluşturabilirsin.\n" +
                     "Anı sayfanı oluşturmak için aşağıdaki bağlantıya tıklaman ve kupon kodunu girmen yeterli.\n" +
-                    "https://styever.com/#/auth/registration/" +
-                    "Kupon Kodunuz : " + userVoucher.Voucher + "\n" + link + "\n" +
+                    link + "\n" +
+                    "Kupon Kodunuz : " + userVoucher.Voucher + "\n" +
                     "Bu kupon kodu yalnızca sana özeldir ve bağlantı üzerinden kullanılabilir.\n" +
                     "Bir anıyı yaşatmanın en güzel yollarından biri olduğuna inanıyoruz.\n" +
                     "Umarız sana biraz olsun iyi hissettirir.\nSevgiler,\nStyever Ekibi";
@@ -163,8 +168,8 @@ namespace UserManagement.Services
                 message += "Merhaba,\n" + userVoucher.SenderEmail + ", senin için anlamlı bir hediye gönderdi.\n\n" + userVoucher.Message + "\n\n" +
                     "Bu hediye ile, sevgiyle anılan özel bir can için anı sayfası oluşturabilirsin.\n" +
                     "Anı sayfanı oluşturmak için aşağıdaki bağlantıya tıklaman ve kupon kodunu girmen yeterli.\n" +
-                    "https://styever.com/#/auth/registration/" +
-                    "Kupon Kodunuz : " + userVoucher.Voucher + "\n" + link + "\n" +
+                    link+ "\n" +
+                    "Kupon Kodunuz : " + userVoucher.Voucher + "\n" +
                     "Bu kupon kodu yalnızca sana özeldir ve bağlantı üzerinden kullanılabilir.\n" +
                     "Bir anıyı yaşatmanın en güzel yollarından biri olduğuna inanıyoruz.\n" + 
                     "Umarız sana biraz olsun iyi hissettirir.\nSevgiler,\nStyever Ekibi";
@@ -966,11 +971,56 @@ namespace UserManagement.Services
             return false;
         }
 
-        private async Task<bool> ChangeBelongingIssuesUserMemory(long id, long memoryId)
+        private async Task<bool> SetBelongingIssuesToTrueUserMemory(long id, long memoryId)
         {
             HttpClient client = new HttpClient();
 
-            var response = await client.GetAsync(configuration["AppSettings:ApiUrl"] + "/api/Memory/ChangeBelongingIssuesUserMemory/" + id + "/" + memoryId);
+            var response = await client.GetAsync(configuration["AppSettings:ApiUrl"] + "/api/Memory/SetBelongingIssuesToTrueUserMemory/" + id + "/" + memoryId);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseStr = await response.Content.ReadAsStringAsync();
+
+                if (!string.IsNullOrEmpty(responseStr))
+                {
+                    try
+                    {
+                        Result<bool> result = JsonConvert.DeserializeObject<Result<bool>>(responseStr);
+
+                        if (result != null)
+                        {
+                            return result.GetData();
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        return false;
+                    }
+
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+
+            return false;
+        }
+
+
+        private async Task<bool> SetBelongingIssuesToFalseUserMemory(long id)
+        {
+            HttpClient client = new HttpClient();
+
+            var response = await client.GetAsync(configuration["AppSettings:ApiUrl"] + "/api/Memory/SetBelongingIssuesToFalseUserMemory/" + id);
 
             if (response.IsSuccessStatusCode)
             {

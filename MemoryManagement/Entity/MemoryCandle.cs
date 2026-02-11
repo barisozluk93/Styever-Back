@@ -12,7 +12,8 @@ namespace MemoryManagement.Entity
         [ForeignKey("MemoryId")]
         public Memory? Memory { get; set; }
 
-        public long UserId { get; set; }
+        public long? UserId { get; set; }
+        public string? NameSurname { get; set; }
 
         public DateTime? Date { get; set; }
         public string? Shelter { get; set; }

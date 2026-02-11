@@ -98,10 +98,10 @@ namespace MemoryManagement.Services
                         memory.Files.ForEach(x => x.File = GetFile(x.FileId).Result);
                         memory.Files.ForEach(x => x.FileName = GetFileName(x.FileId).Result);
 
-                        memory.Candles = await _dbContext.MemoryCandles.Where(x => x.MemoryId == id && !x.IsDeleted).GroupBy(x => x.UserId).Select(g => g.First()).ToListAsync();
-                        memory.CandlesCount = await _dbContext.MemoryCandles.Where(x => x.MemoryId == id && !x.IsDeleted).GroupBy(x => x.UserId).CountAsync();
-                        memory.Candles.ForEach(x => x.UserName = GetUserName(x.UserId).Result);
-                        memory.Candles.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId).Result);
+                        memory.Candles = await _dbContext.MemoryCandles.Where(x => x.MemoryId == id && !x.IsDeleted).GroupBy(x => x.UserId != null ? x.UserId.ToString() : x.NameSurname).Select(g => g.First()).ToListAsync();
+                        memory.CandlesCount = await _dbContext.MemoryCandles.Where(x => x.MemoryId == id && !x.IsDeleted).GroupBy(x => x.UserId != null ? x.UserId.ToString() : x.NameSurname).CountAsync();
+                        memory.Candles.ForEach(x => x.UserName = x.UserId.HasValue ? GetUserName(x.UserId.Value).Result : null);
+                        memory.Candles.ForEach(x => x.UserAvatar = x.UserId.HasValue ? GetUserAvatar(x.UserId.Value).Result : null);
 
                         memory.Comments = await _dbContext.MemoryComments.Where(x => x.MemoryId == id && !x.IsDeleted).ToListAsync();
                         memory.CommentsCount = await _dbContext.MemoryComments.Where(x => x.MemoryId == id && !x.IsDeleted).CountAsync();
@@ -134,7 +134,7 @@ namespace MemoryManagement.Services
             return result;
         }
 
-        public async Task<Result<bool>> ChangeBelongingIssuesUserMemory(long userId, long memoryId)
+        public async Task<Result<bool>> SetBelongingIssuesToTrueUserMemory(long userId, long memoryId)
         {
             var result = new Result<bool>();
 
@@ -171,6 +171,42 @@ namespace MemoryManagement.Services
             return result;
         }
 
+        public async Task<Result<bool>> SetBelongingIssuesToFalseUserMemory(long userId)
+        {
+            var result = new Result<bool>();
+
+            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            {
+                try
+                {
+                    var memories = await _dbContext.Memories.Include(x => x.Category).Where(x => x.UserId == userId && !x.IsDeleted && x.BelongingToOldPackage).ToListAsync();
+                    if (memories != null && memories.Count() > 0)
+                    {
+                        memories.ForEach(memory => memory.BelongingToOldPackage = false);
+                        await _dbContext.SaveChangesAsync();
+
+                        result.SetData(true);
+                        result.SetMessage("İşlem başarı ile gerçekleşti.");
+                    }
+                    else
+                    {
+                        result.SetData(true);
+                        result.SetMessage("İşlem başarı ile gerçekleşti.");
+                    }
+
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+
+                    result.SetIsSuccess(false);
+                    result.SetMessage(ex.Message);
+                }
+            }
+
+            return result;
+        }
         public async Task<Result<bool>> ActivateUserMemories(long userId)
         {
             var result = new Result<bool>();
@@ -285,7 +321,9 @@ namespace MemoryManagement.Services
                              Likes = _dbContext.MemoryLikes.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList(),
                              LikesCount = _dbContext.MemoryLikes.Where(x => x.MemoryId == s.Id && !x.IsDeleted).Count(),
                              Files = _dbContext.MemoryFiles.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList(),
-                         });
+                             YoutubeLinks = _dbContext.MemoryYoutubeLinks.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList(),
+                             BelongingToOldPackage = s.BelongingToOldPackage
+                        });
                     }
                     else
                     {
@@ -308,14 +346,15 @@ namespace MemoryManagement.Services
                             IsPrivate = s.IsPrivate,
                             PostDate = s.PostDate,
                             Text = s.Text,
-                            CandlesCount = _dbContext.MemoryCandles.Where(x => x.MemoryId == s.Id && !x.IsDeleted).GroupBy(x => x.UserId).Count(),
-                            Candles = _dbContext.MemoryCandles.Where(x => x.MemoryId == s.Id && !x.IsDeleted).GroupBy(x => x.UserId).Select(g => g.First()).ToList(),
+                            CandlesCount = _dbContext.MemoryCandles.Where(x => x.MemoryId == s.Id && !x.IsDeleted).GroupBy(x => x.UserId != null ? x.UserId.ToString() : x.NameSurname).Count(),
+                            Candles = _dbContext.MemoryCandles.Where(x => x.MemoryId == s.Id && !x.IsDeleted).GroupBy(x => x.UserId != null ? x.UserId.ToString() : x.NameSurname).Select(g => g.First()).ToList(),
                             CommentsCount = _dbContext.MemoryComments.Where(x => x.MemoryId == s.Id && !x.IsDeleted).Count(),
                             Comments = _dbContext.MemoryComments.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList(),
                             Likes = _dbContext.MemoryLikes.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList(),
                             LikesCount = _dbContext.MemoryLikes.Where(x => x.MemoryId == s.Id && !x.IsDeleted).Count(),
                             Files = _dbContext.MemoryFiles.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList(),
-                            YoutubeLinks = _dbContext.MemoryYoutubeLinks.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList()
+                            YoutubeLinks = _dbContext.MemoryYoutubeLinks.Where(x => x.MemoryId == s.Id && !x.IsDeleted).ToList(),
+                            BelongingToOldPackage = s.BelongingToOldPackage
                         });
                     }
 
@@ -325,8 +364,8 @@ namespace MemoryManagement.Services
                     pagination.ForEach(x => x.UserName = GetUserName(x.UserId).Result);
                     pagination.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId).Result);
                     pagination.ForEach(x => x.UserCityCountry = GetUserCityCountry(x.UserId).Result);
-                    pagination.ForEach(x => x.Candles.ForEach(y => y.UserName = GetUserName(y.UserId).Result));
-                    pagination.ForEach(x => x.Candles.ForEach(y => y.UserAvatar = GetUserAvatar(y.UserId).Result));
+                    pagination.ForEach(x => x.Candles.ForEach(y => y.UserName = y.UserId.HasValue ? GetUserName(y.UserId.Value).Result : null));
+                    pagination.ForEach(x => x.Candles.ForEach(y => y.UserAvatar = y.UserId.HasValue ? GetUserAvatar(y.UserId.Value).Result: null));
                     pagination.ForEach(x => x.Comments.ForEach(y => y.UserName = y.UserId.HasValue ? GetUserName(y.UserId.Value).Result : null));
                     pagination.ForEach(x => x.Comments.ForEach(y => y.UserAvatar = y.UserId.HasValue ? GetUserAvatar(y.UserId.Value).Result : null));
                     pagination.ForEach(x => x.Likes.ForEach(y => y.UserName = GetUserName(y.UserId).Result));
@@ -575,14 +614,15 @@ namespace MemoryManagement.Services
                                             Id = s.Id,
                                             IsDeleted = s.IsDeleted,
                                             UserId = s.UserId,
-                                            MemoryId = memoryId
+                                            MemoryId = memoryId,
+                                            NameSurname = s.NameSurname
                                         })
-                                        .GroupBy(x => x.UserId)
+                                        .GroupBy(x => x.UserId != null ? x.UserId.ToString() : x.NameSurname)
                                         .Select(s => s.First())
                                         .ToListAsync();
 
-                    queryable.ForEach(x => x.UserName = GetUserName(x.UserId).Result);
-                    queryable.ForEach(x => x.UserAvatar = GetUserAvatar(x.UserId).Result);
+                    queryable.ForEach(x => x.UserName = x.UserId.HasValue ? GetUserName(x.UserId.Value).Result : null);
+                    queryable.ForEach(x => x.UserAvatar = x.UserId.HasValue ? GetUserAvatar(x.UserId.Value).Result : null);
 
                     result.SetData(queryable);
                     result.SetMessage("İşlem başarı ile gerçekleşti.");

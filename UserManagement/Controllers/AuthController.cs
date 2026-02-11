@@ -74,7 +74,7 @@ namespace UserManagement.Controllers
 
         [HttpPost("ChangePassword")]
         [Authorize]
-        [HasPermission("Profile.ChangePw.Permission")]
+        [HasPermission("ProfileScene.ChangePw.Permission")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
             var result = await authService.ChangePassword(request);

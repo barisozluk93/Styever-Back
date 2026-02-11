@@ -28,6 +28,8 @@ namespace MemoryManagement.Interfaces
         Task<Result<List<MemoryCandle>>> CandleAll(long memoryId);
         Task<Result<bool>> ActivateUserMemories(long userId);
         Task<Result<bool>> DeactivateUserMemories(long userId);
-        Task<Result<bool>> ChangeBelongingIssuesUserMemory(long userId, long memoryId);
+        Task<Result<bool>> SetBelongingIssuesToTrueUserMemory(long userId, long memoryId);
+        Task<Result<bool>> SetBelongingIssuesToFalseUserMemory(long userId);
+
     }
 }
