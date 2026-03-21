@@ -2,17 +2,10 @@
 using MemoryManagement.Entity;
 using MemoryManagement.Interfaces;
 using MemoryManagement.Model;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
 using System.Data;
-using System.Diagnostics;
-using System.Linq.Expressions;
-using System.Net.Http.Headers;
-using System.Reflection;
+using System.Text;
 
 namespace MemoryManagement.Services
 {
@@ -721,6 +714,18 @@ namespace MemoryManagement.Services
                     await _dbContext.SaveChangesAsync();
                     transaction.Commit();
 
+                    Notification notification = new Notification();
+                    notification.Type = "comment_not";
+                    notification.Title = "Styever";
+                    notification.Body = (memoryComment.UserId.HasValue ? await GetUserName(memoryComment.UserId.Value) : memoryComment.NameSurname) + " anınıza yorum yaptı.";
+                    notification.IsDeleted = false;
+                    notification.IsRead = false;
+                    notification.UserId = await _dbContext.Memories.Where(m => m.Id == memoryComment.MemoryId).Select(s => s.UserId).FirstOrDefaultAsync();
+                    notification.CreatedAt = DateTime.UtcNow;
+                    notification.TargetUrl = "" + memoryComment.MemoryId;
+
+                    await AddNotification(notification);
+
                     result.SetData(memoryComment);
                     result.SetMessage("İşlem başarı ile gerçekleşti.");
                 }
@@ -777,6 +782,18 @@ namespace MemoryManagement.Services
                     _dbContext.MemoryLikes.Add(memoryLike);
                     await _dbContext.SaveChangesAsync();
                     transaction.Commit();
+
+                    Notification notification = new Notification();
+                    notification.Type = "like";
+                    notification.Title = "Styever";
+                    notification.Body = await GetUserName(memoryLike.UserId) + " anınızı beğendi.";
+                    notification.IsDeleted = false;
+                    notification.IsRead = false;
+                    notification.UserId = await _dbContext.Memories.Where(m => m.Id == memoryLike.MemoryId).Select(s => s.UserId).FirstOrDefaultAsync();
+                    notification.CreatedAt = DateTime.UtcNow;
+                    notification.TargetUrl = "" + memoryLike.MemoryId;
+
+                    await AddNotification(notification);
 
                     result.SetData(memoryLike);
                     result.SetMessage("İşlem başarı ile gerçekleşti.");
@@ -863,6 +880,18 @@ namespace MemoryManagement.Services
                     _dbContext.MemoryCandles.Add(memoryCandle);
                     await _dbContext.SaveChangesAsync();
                     transaction.Commit();
+
+                    Notification notification = new Notification();
+                    notification.Type = "lighting_candle";
+                    notification.Title = "Styever";
+                    notification.Body = (memoryCandle.UserId.HasValue ? await GetUserName(memoryCandle.UserId.Value) : memoryCandle.NameSurname) + " anınız için bir mum yaktı.";
+                    notification.IsDeleted = false;
+                    notification.IsRead = false;
+                    notification.UserId = await _dbContext.Memories.Where(m => m.Id == memoryCandle.MemoryId).Select(s => s.UserId).FirstOrDefaultAsync();
+                    notification.CreatedAt = DateTime.UtcNow;
+                    notification.TargetUrl = "" + memoryCandle.MemoryId;
+
+                    await AddNotification(notification);
 
                     result.SetData(memoryCandle);
                     result.SetMessage("İşlem başarı ile gerçekleşti.");
@@ -1127,6 +1156,58 @@ namespace MemoryManagement.Services
                     try
                     {
                         Result<Model.File> result = JsonConvert.DeserializeObject<Result<Model.File>>(responseStr);
+
+                        if (result.GetData() != null)
+                        {
+                            return result.GetData();
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        return null;
+                    }
+
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
+
+            return null;
+        }
+
+        private async Task<Notification> AddNotification(Notification notification)
+        {
+            HttpClient client = new HttpClient();
+
+            var json = JsonConvert.SerializeObject(notification);
+
+            var content = new StringContent(
+                json,
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            var response = await client.PostAsync(_configuration["AppSettings:ApiUrl"] + "/api/Notification/Save", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseStr = await response.Content.ReadAsStringAsync();
+
+                if (!string.IsNullOrEmpty(responseStr))
+                {
+                    try
+                    {
+                        Result<Notification> result = JsonConvert.DeserializeObject<Result<Notification>>(responseStr);
 
                         if (result.GetData() != null)
                         {

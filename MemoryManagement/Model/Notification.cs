@@ -1,4 +1,4 @@
-﻿namespace NotificationManagement.Entity
+﻿namespace MemoryManagement.Model
 {
     public class Notification
     {

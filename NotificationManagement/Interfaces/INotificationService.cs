@@ -9,5 +9,8 @@ namespace NotificationManagement.Interfaces
         Task<Result<Notification>> Save(Notification notification);
         Task<Result<Notification>> Delete(long id);
         Task<Result<Notification>> Read(long id);
+        Task<Result<int>> GetUnreadCount(long userId);
+        Task<Result<bool>> RegisterDevice(RegisterDeviceRequest request);
+
     }
 }
