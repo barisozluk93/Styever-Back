@@ -1,0 +1,13 @@
+@ReportContentManagement_HostAddress = http://localhost:5018
+
+POST {{ReportContentManagement_HostAddress}}/api/ReportContent/Save
+Content-Type: application/json
+
+{
+  "userId": null,
+  "fullName": "Test User",
+  "email": "test@example.com",
+  "complaintType": "COMPLAINT_TYPE_OTHER",
+  "reportedUrl": "https://styever.com/#/memories/1",
+  "description": "Test complaint"
+}

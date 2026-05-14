@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContactUsManagement", "Cont
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationManagement", "NotificationManagement\NotificationManagement.csproj", "{3B43FC53-AC60-4DAD-A86C-39BDEDEDABF9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReportContentManagement", "ReportContentManagement\ReportContentManagement.csproj", "{9956A491-42FB-4DE8-910A-F2D500984499}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{3B43FC53-AC60-4DAD-A86C-39BDEDEDABF9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3B43FC53-AC60-4DAD-A86C-39BDEDEDABF9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3B43FC53-AC60-4DAD-A86C-39BDEDEDABF9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9956A491-42FB-4DE8-910A-F2D500984499}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9956A491-42FB-4DE8-910A-F2D500984499}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9956A491-42FB-4DE8-910A-F2D500984499}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9956A491-42FB-4DE8-910A-F2D500984499}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

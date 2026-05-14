@@ -36,6 +36,16 @@
         "Path": "NotificationManagement\\NotificationManagement.csproj",
         "Action": "Start",
         "DebugTarget": "http"
+      },
+      {
+        "Path": "ContactUsManagement\\ContactUsManagement.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
+      },
+      {
+        "Path": "ReportContentManagement\\ReportContentManagement.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
       }
     ]
   }

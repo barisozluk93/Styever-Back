@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using MimeKit;
+using MimeKit.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Data;
@@ -151,36 +152,155 @@ namespace UserManagement.Services
 
         private async Task SendGiftMessage(UserVoucher userVoucher, User? user, string link)
         {
-            string message = string.Empty;
-            if(user != null)
-            {
-                message += "Merhaba,\n" + user.Name + " " + user.Surname + " senin için anlamlı bir hediye gönderdi.\n\n" + userVoucher.Message + "\n\n" +
-                    "Bu hediye ile, sevgiyle anılan özel bir can için anı sayfası oluşturabilirsin.\n" +
-                    "Anı sayfanı oluşturmak için aşağıdaki bağlantıya tıklaman ve kupon kodunu girmen yeterli.\n" +
-                    link + "\n" +
-                    "Kupon Kodunuz : " + userVoucher.Voucher + "\n" +
-                    "Bu kupon kodu yalnızca sana özeldir ve bağlantı üzerinden kullanılabilir.\n" +
-                    "Bir anıyı yaşatmanın en güzel yollarından biri olduğuna inanıyoruz.\n" +
-                    "Umarız sana biraz olsun iyi hissettirir.\nSevgiler,\nStyever Ekibi";
-            }
-            else
-            {
-                message += "Merhaba,\n" + userVoucher.SenderEmail + ", senin için anlamlı bir hediye gönderdi.\n\n" + userVoucher.Message + "\n\n" +
-                    "Bu hediye ile, sevgiyle anılan özel bir can için anı sayfası oluşturabilirsin.\n" +
-                    "Anı sayfanı oluşturmak için aşağıdaki bağlantıya tıklaman ve kupon kodunu girmen yeterli.\n" +
-                    link+ "\n" +
-                    "Kupon Kodunuz : " + userVoucher.Voucher + "\n" +
-                    "Bu kupon kodu yalnızca sana özeldir ve bağlantı üzerinden kullanılabilir.\n" +
-                    "Bir anıyı yaşatmanın en güzel yollarından biri olduğuna inanıyoruz.\n" + 
-                    "Umarız sana biraz olsun iyi hissettirir.\nSevgiler,\nStyever Ekibi";
-            }
+            var senderName = user != null
+                ? $"{user.Name} {user.Surname}"
+                : userVoucher.SenderEmail;
+
+            var receiverName = "Değerli Dostumuz";
+            var petName = "Dostunuz";
+
+            var headerImagePath = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "email",
+                "styever-gift-header.png"
+            );
+
+            var builder = new BodyBuilder();
+
+            var headerImage = builder.LinkedResources.Add(headerImagePath);
+            headerImage.ContentId = MimeUtils.GenerateMessageId();
+
+            string html = $@"
+<!DOCTYPE html>
+<html lang='tr'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+</head>
+
+<body style='margin:0;padding:0;background:#dcefe5;font-family:Arial,Helvetica,sans-serif;'>
+
+<table width='100%' cellpadding='0' cellspacing='0' border='0'
+       style='background:linear-gradient(180deg,#b8ded3 0%,#f5eee2 100%);padding:55px 0;'>
+
+<tr>
+<td align='center'>
+
+<table width='600' cellpadding='0' cellspacing='0' border='0'
+       style='width:600px;max-width:600px;background:#fffdf7;border-radius:14px;overflow:hidden;
+              box-shadow:0 14px 35px rgba(0,0,0,0.25);border:1px solid rgba(0,0,0,0.18);'>
+
+<tr>
+<td>
+<img src='cid:{headerImage.ContentId}'
+     width='600'
+     alt='Styever'
+     style='width:600px;max-width:600px;height:auto;display:block;border:0;' />
+</td>
+</tr>
+
+<tr>
+<td style='padding:24px 34px 18px 34px;color:#111111;font-size:16px;line-height:1.15;'>
+
+<p style='margin:0 0 22px 0;font-size:18px;line-height:1.15;'>
+<strong>Konu:</strong> {senderName} size çok özel bir hediye gönderdi:<br>
+{petName} için bir anı sayfası.
+</p>
+
+<p style='margin:0 0 18px 0;'>Merhaba <strong>{receiverName}</strong>,</p>
+
+<p style='margin:0 0 18px 0;'>
+Bazen bir hediye, binlerce kelimenin anlatamadığı o derin desteği ve
+“yanındayım” mesajını en zarif haliyle hissettirir.
+<strong>{senderName}</strong>, kaybettiğiniz can dostunuz
+<strong>{petName}</strong>’nin sevgisini her an yanınızda hissetmeniz ve
+hatırasını onurlandırmanız için size anlamlı bir
+<strong>Styever hediye çeki</strong> gönderdi.
+</p>
+
+<p style='margin:0 0 18px 0;'>
+<strong>Çifte İyilik, Tek Hediye</strong><br>
+Bu hediye sadece sizin için değil, sokaktaki can dostlarımız için de bir umut oldu.
+{senderName} bu hediyeyi sizin adınıza tanımlarken, aynı zamanda sahipsiz
+hayvanların mama ve tedavi ihtiyaçları için sosyal sorumluluk projelerine
+destek ulaştırılmasını sağladı.
+</p>
+
+<p style='margin:0 0 18px 0;'>
+<strong>Styever: Sevgiyi ve Anıları Yaşatan Dijital Bir Yuva</strong><br>
+Styever; kaybettiğimiz dostlarımızın fotoğraflarını, videolarını ve en güzel
+anılarını bir araya getirebileceğiniz size özel bir alandır. Burası, dostunuzun
+hikayesini dilediğiniz her an ziyaret edebileceğiniz huzurlu bir köşedir.
+</p>
+
+<p style='margin:0 0 20px 0;'>
+<strong>Hemen Başlayın</strong><br>
+Sizin için hazırlanan bu özel hediyeyi kabul etmek ve dostunuzun anı sayfasını
+oluşturmaya başlamak için aşağıdaki bağlantıya tıklamanız yeterli:
+</p>
+
+<table width='100%' cellpadding='0' cellspacing='0' border='0'>
+<tr>
+<td align='center' style='padding:0 0 24px 0;'>
+<a href='{link}'
+   style='background:#1f4b3a;color:#ffffff;text-decoration:none;
+          padding:13px 28px;border-radius:6px;font-size:16px;font-weight:bold;
+          display:inline-block;'>
+[Hediyemi Kabul Et ve Anı Sayfasını Oluştur]
+</a>
+</td>
+</tr>
+</table>
+
+<p style='margin:0 0 18px 0;'>
+<strong>Kupon Kodunuz:</strong> {userVoucher.Voucher}
+</p>
+
+<p style='margin:0 0 18px 0;'>
+Sevgi ve saygıyla,<br>
+<strong>Styever Ekibi</strong>
+</p>
+
+<hr style='border:none;border-top:1px solid #d8d2c8;margin:20px 0;'>
+
+<p style='text-align:center;font-size:12px;color:#555;margin:0;'>
+*Bu e-posta {senderName} tarafından size ulaştırılmıştır.
+</p>
+
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>";
+
+            builder.HtmlBody = html;
+
+            builder.TextBody = $@"
+Merhaba {receiverName},
+
+{senderName} size anlamlı bir Styever hediye çeki gönderdi.
+
+Anı sayfanızı oluşturmak için:
+{link}
+
+Kupon Kodunuz: {userVoucher.Voucher}
+
+Sevgiler,
+Styever Ekibi";
 
             var emailMessage = new MimeMessage();
             emailMessage.Sender = MailboxAddress.Parse(_mailSettings.Mail);
             emailMessage.From.Add(MailboxAddress.Parse(_mailSettings.Mail));
             emailMessage.To.Add(MailboxAddress.Parse(userVoucher.ReceiverEmail));
-            emailMessage.Subject = "Senin İçin Anlamlı Bir Hediye Var";
-            emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Text) { Text =  message };
+            emailMessage.Subject = $"{senderName} size çok özel bir hediye gönderdi";
+            emailMessage.Body = builder.ToMessageBody();
 
             using var smtp = new SmtpClient();
             smtp.Connect(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.SslOnConnect);
@@ -188,7 +308,6 @@ namespace UserManagement.Services
             await smtp.SendAsync(emailMessage);
             smtp.Disconnect(true);
         }
-
         public async Task<Result<UserVoucher>> VoucherControl(string voucher)
         {
             var result = new Result<UserVoucher>();
