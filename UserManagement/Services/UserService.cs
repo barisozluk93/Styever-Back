@@ -201,37 +201,30 @@ namespace UserManagement.Services
 </tr>
 
 <tr>
-<td style='padding:24px 34px 18px 34px;color:#111111;font-size:16px;line-height:1.15;'>
-
-<p style='margin:0 0 22px 0;font-size:18px;line-height:1.15;'>
-<strong>Konu:</strong> {senderName} size çok özel bir hediye gönderdi:<br>
-{petName} için bir anı sayfası.
-</p>
+<td style='padding:24px 34px 18px 34px;color:#111111;font-size:16px;line-height:1.35;'>
 
 <p style='margin:0 0 18px 0;'>Merhaba <strong>{receiverName}</strong>,</p>
 
 <p style='margin:0 0 18px 0;'>
 Bazen bir hediye, binlerce kelimenin anlatamadığı o derin desteği ve
-“yanındayım” mesajını en zarif haliyle hissettirir.
-<strong>{senderName}</strong>, kaybettiğiniz can dostunuz
-<strong>{petName}</strong>’nin sevgisini her an yanınızda hissetmeniz ve
-hatırasını onurlandırmanız için size anlamlı bir
-<strong>Styever hediye çeki</strong> gönderdi.
+<strong>“yanındayım”</strong> mesajını en zarif haliyle hissettirir.
 </p>
 
 <p style='margin:0 0 18px 0;'>
-<strong>Çifte İyilik, Tek Hediye</strong><br>
-Bu hediye sadece sizin için değil, sokaktaki can dostlarımız için de bir umut oldu.
-{senderName} bu hediyeyi sizin adınıza tanımlarken, aynı zamanda sahipsiz
-hayvanların mama ve tedavi ihtiyaçları için sosyal sorumluluk projelerine
-destek ulaştırılmasını sağladı.
+<strong>{senderName}</strong>, kaybettiğiniz can dostunuz
+<strong>{petName}</strong>’nın sevgisini her an kalbinizde hissetmeniz ve
+hatırasını onurlandırmanız için size anlamlı bir
+<strong>Styever anı sayfası</strong> hediye etti.
 </p>
 
 <p style='margin:0 0 18px 0;'>
 <strong>Styever: Sevgiyi ve Anıları Yaşatan Dijital Bir Yuva</strong><br>
 Styever; kaybettiğimiz dostlarımızın fotoğraflarını, videolarını ve en güzel
 anılarını bir araya getirebileceğiniz size özel bir alandır. Burası, dostunuzun
-hikayesini dilediğiniz her an ziyaret edebileceğiniz huzurlu bir köşedir.
+hikayesini dilediğiniz her an ziyaret edebileceğiniz, sevdiklerinizle ve
+dostlarınızla taziye mesajları paylaşarak hatırasını hep taze tutabileceğiniz
+huzurlu bir köşedir. Onların hayatımızda bıraktığı izleri güvenle saklamanız
+için tasarlanmış, sevgi dolu bir altyapıdır.
 </p>
 
 <p style='margin:0 0 20px 0;'>
@@ -247,7 +240,7 @@ oluşturmaya başlamak için aşağıdaki bağlantıya tıklamanız yeterli:
    style='background:#1f4b3a;color:#ffffff;text-decoration:none;
           padding:13px 28px;border-radius:6px;font-size:16px;font-weight:bold;
           display:inline-block;'>
-[Hediyemi Kabul Et ve Anı Sayfasını Oluştur]
+Anı Sayfasını Oluştur
 </a>
 </td>
 </tr>
@@ -255,6 +248,10 @@ oluşturmaya başlamak için aşağıdaki bağlantıya tıklamanız yeterli:
 
 <p style='margin:0 0 18px 0;'>
 <strong>Kupon Kodunuz:</strong> {userVoucher.Voucher}
+</p>
+
+<p style='margin:0 0 18px 0;'>
+Her zaman yanınızdayız.
 </p>
 
 <p style='margin:0 0 18px 0;'>
@@ -285,21 +282,32 @@ Sevgi ve saygıyla,<br>
             builder.TextBody = $@"
 Merhaba {receiverName},
 
-{senderName} size anlamlı bir Styever hediye çeki gönderdi.
+Bazen bir hediye, binlerce kelimenin anlatamadığı o derin desteği ve ""yanındayım"" mesajını en zarif haliyle hissettirir.
 
-Anı sayfanızı oluşturmak için:
+{senderName}, kaybettiğiniz can dostunuz {petName}'nın sevgisini her an kalbinizde hissetmeniz ve hatırasını onurlandırmanız için size anlamlı bir Styever anı sayfası hediye etti.
+
+Styever: Sevgiyi ve Anıları Yaşatan Dijital Bir Yuva
+
+Styever; kaybettiğimiz dostlarımızın fotoğraflarını, videolarını ve en güzel anılarını bir araya getirebileceğiniz size özel bir alandır. Burası, dostunuzun hikayesini dilediğiniz her an ziyaret edebileceğiniz, sevdiklerinizle ve dostlarınızla taziye mesajları paylaşarak hatırasını hep taze tutabileceğiniz huzurlu bir köşedir. Onların hayatımızda bıraktığı izleri güvenle saklamanız için tasarlanmış, sevgi dolu bir altyapıdır.
+
+Hemen Başlayın
+
+Sizin için hazırlanan bu özel hediyeyi kabul etmek ve dostunuzun anı sayfasını oluşturmaya başlamak için aşağıdaki bağlantıya tıklamanız yeterli:
+
 {link}
 
 Kupon Kodunuz: {userVoucher.Voucher}
 
-Sevgiler,
+Her zaman yanınızdayız.
+
+Sevgi ve saygıyla,
 Styever Ekibi";
 
             var emailMessage = new MimeMessage();
             emailMessage.Sender = MailboxAddress.Parse(_mailSettings.Mail);
             emailMessage.From.Add(MailboxAddress.Parse(_mailSettings.Mail));
             emailMessage.To.Add(MailboxAddress.Parse(userVoucher.ReceiverEmail));
-            emailMessage.Subject = $"{senderName} size çok özel bir hediye gönderdi";
+            emailMessage.Subject = $"{senderName} size anlamlı bir Styever anı sayfası hediye etti";
             emailMessage.Body = builder.ToMessageBody();
 
             using var smtp = new SmtpClient();
