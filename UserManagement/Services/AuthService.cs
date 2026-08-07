@@ -542,5 +542,6 @@ namespace UserManagement.Services
                 keySize);
             return Convert.ToHexString(hash);
         }
+
     }
 }

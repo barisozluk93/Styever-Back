@@ -12,8 +12,8 @@ using UserManagement.DbContexts;
 namespace UserManagement.Migrations
 {
     [DbContext(typeof(UserManagementContext))]
-    [Migration("20260203110724_NewPermissionAdded")]
-    partial class NewPermissionAdded
+    [Migration("20260806205512_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1672,6 +1672,72 @@ namespace UserManagement.Migrations
                         });
                 });
 
+            modelBuilder.Entity("UserManagement.Entity.ShopierPayment", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("BuyerEmail")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("CompletedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("GiftPayload")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<long>("MemoryId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("PlanId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ProductId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProductUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PurchaseType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("Reference")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ShopierOrderId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Reference")
+                        .IsUnique();
+
+                    b.HasIndex("ShopierOrderId")
+                        .IsUnique();
+
+                    b.ToTable("ShopierPayments");
+                });
+
             modelBuilder.Entity("UserManagement.Entity.User", b =>
                 {
                     b.Property<long>("Id")
@@ -1739,9 +1805,9 @@ namespace UserManagement.Migrations
                         new
                         {
                             Id = 1L,
-                            CreatedDate = new DateTime(2026, 2, 3, 11, 7, 24, 345, DateTimeKind.Utc).AddTicks(773),
+                            CreatedDate = new DateTime(2026, 8, 6, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(32),
                             Email = "super@test.com",
-                            ExpirationDate = new DateTime(2027, 2, 3, 11, 7, 24, 345, DateTimeKind.Utc).AddTicks(780),
+                            ExpirationDate = new DateTime(2027, 8, 6, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(40),
                             IsActive = true,
                             IsDeleted = false,
                             IsSystemData = true,
@@ -1751,15 +1817,15 @@ namespace UserManagement.Migrations
                             Phone = "+905077352772",
                             Salt = new byte[] { 3, 251, 182, 108, 1, 165, 5, 95, 117, 7, 42, 45, 196, 160, 190, 194, 65, 169, 48, 49, 99, 22, 120, 177, 165, 246, 57, 186, 94, 216, 59, 80, 48, 229, 210, 31, 5, 173, 219, 134, 83, 73, 90, 196, 220, 216, 163, 14, 219, 106, 52, 183, 13, 250, 15, 143, 154, 208, 85, 45, 29, 52, 13, 105 },
                             Surname = "SuperAdmin",
-                            TrialExpirationDate = new DateTime(2026, 2, 10, 11, 7, 24, 345, DateTimeKind.Utc).AddTicks(774),
+                            TrialExpirationDate = new DateTime(2026, 8, 13, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(35),
                             Username = "superadmin"
                         },
                         new
                         {
                             Id = 2L,
-                            CreatedDate = new DateTime(2026, 2, 3, 11, 7, 24, 345, DateTimeKind.Utc).AddTicks(810),
+                            CreatedDate = new DateTime(2026, 8, 6, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(65),
                             Email = "memory@test.com",
-                            ExpirationDate = new DateTime(2027, 2, 3, 11, 7, 24, 345, DateTimeKind.Utc).AddTicks(810),
+                            ExpirationDate = new DateTime(2027, 8, 6, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(66),
                             FileId = 1L,
                             IsActive = true,
                             IsDeleted = false,
@@ -1770,15 +1836,15 @@ namespace UserManagement.Migrations
                             Phone = "+905077352772",
                             Salt = new byte[] { 3, 251, 182, 108, 1, 165, 5, 95, 117, 7, 42, 45, 196, 160, 190, 194, 65, 169, 48, 49, 99, 22, 120, 177, 165, 246, 57, 186, 94, 216, 59, 80, 48, 229, 210, 31, 5, 173, 219, 134, 83, 73, 90, 196, 220, 216, 163, 14, 219, 106, 52, 183, 13, 250, 15, 143, 154, 208, 85, 45, 29, 52, 13, 105 },
                             Surname = "User",
-                            TrialExpirationDate = new DateTime(2026, 2, 10, 11, 7, 24, 345, DateTimeKind.Utc).AddTicks(810),
+                            TrialExpirationDate = new DateTime(2026, 8, 13, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(65),
                             Username = "memoryuser"
                         },
                         new
                         {
                             Id = 3L,
-                            CreatedDate = new DateTime(2026, 2, 3, 11, 7, 24, 345, DateTimeKind.Utc).AddTicks(817),
+                            CreatedDate = new DateTime(2026, 8, 6, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(72),
                             Email = "tribute@test.com",
-                            ExpirationDate = new DateTime(2027, 2, 3, 11, 7, 24, 345, DateTimeKind.Utc).AddTicks(817),
+                            ExpirationDate = new DateTime(2027, 8, 6, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(73),
                             FileId = 2L,
                             IsActive = true,
                             IsDeleted = false,
@@ -1789,15 +1855,15 @@ namespace UserManagement.Migrations
                             Phone = "+905077352772",
                             Salt = new byte[] { 3, 251, 182, 108, 1, 165, 5, 95, 117, 7, 42, 45, 196, 160, 190, 194, 65, 169, 48, 49, 99, 22, 120, 177, 165, 246, 57, 186, 94, 216, 59, 80, 48, 229, 210, 31, 5, 173, 219, 134, 83, 73, 90, 196, 220, 216, 163, 14, 219, 106, 52, 183, 13, 250, 15, 143, 154, 208, 85, 45, 29, 52, 13, 105 },
                             Surname = "User",
-                            TrialExpirationDate = new DateTime(2026, 2, 10, 11, 7, 24, 345, DateTimeKind.Utc).AddTicks(817),
+                            TrialExpirationDate = new DateTime(2026, 8, 13, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(72),
                             Username = "tributeuser"
                         },
                         new
                         {
                             Id = 4L,
-                            CreatedDate = new DateTime(2026, 2, 3, 11, 7, 24, 345, DateTimeKind.Utc).AddTicks(855),
+                            CreatedDate = new DateTime(2026, 8, 6, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(77),
                             Email = "eternal@test.com",
-                            ExpirationDate = new DateTime(2027, 2, 3, 11, 7, 24, 345, DateTimeKind.Utc).AddTicks(856),
+                            ExpirationDate = new DateTime(2027, 8, 6, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(77),
                             FileId = 3L,
                             IsActive = true,
                             IsDeleted = false,
@@ -1808,7 +1874,7 @@ namespace UserManagement.Migrations
                             Phone = "+905077352772",
                             Salt = new byte[] { 3, 251, 182, 108, 1, 165, 5, 95, 117, 7, 42, 45, 196, 160, 190, 194, 65, 169, 48, 49, 99, 22, 120, 177, 165, 246, 57, 186, 94, 216, 59, 80, 48, 229, 210, 31, 5, 173, 219, 134, 83, 73, 90, 196, 220, 216, 163, 14, 219, 106, 52, 183, 13, 250, 15, 143, 154, 208, 85, 45, 29, 52, 13, 105 },
                             Surname = "User",
-                            TrialExpirationDate = new DateTime(2026, 2, 10, 11, 7, 24, 345, DateTimeKind.Utc).AddTicks(856),
+                            TrialExpirationDate = new DateTime(2026, 8, 13, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(77),
                             Username = "eternaluser"
                         });
                 });
@@ -1855,6 +1921,74 @@ namespace UserManagement.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserAddresses");
+                });
+
+            modelBuilder.Entity("UserManagement.Entity.UserAgreementAcceptance", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<DateTime>("AcceptedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("AgreementType")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)");
+
+                    b.Property<string>("ContentSnapshot")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Context")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("DocumentUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Language")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
+
+                    b.Property<string>("RelatedReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "AcceptedDate");
+
+                    b.ToTable("UserAgreementAcceptances");
                 });
 
             modelBuilder.Entity("UserManagement.Entity.UserPayment", b =>

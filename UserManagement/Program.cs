@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.HttpOverrides;
+using UserManagement.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +36,9 @@ builder.Services.AddDbContext<UserManagementContext>(options =>
 builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAgreementService, AgreementService>();
+builder.Services.Configure<ShopierOptions>(Configuration.GetSection("Shopier"));
+builder.Services.AddScoped<IShopierPaymentService, ShopierPaymentService>();
 builder.Services.AddTransient<IAuthService, AuthService>();
 builder.Services.AddTransient<ITokenService, TokenService>();
 builder.Services.AddHostedService<UserDailyWorker>();
@@ -65,6 +70,15 @@ builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHand
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Servis localhost'a bind olduğu ve public HTTPS reverse proxy'de sonlandığı için
+    // proxy adresini önceden bilmiyorsak forwarded header'ları kabul ediyoruz.
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -79,7 +93,29 @@ else
     scope.ServiceProvider.GetRequiredService<UserManagementContext>().Database.Migrate();
 }
 
-app.UseHttpsRedirection();
+app.UseForwardedHeaders();
+
+// Shopier isteğini MVC/action seçimine girmeden önce kaydet. Böylece 404/405/415,
+// model-binding veya proxy kaynaklı bir sorun olsa bile isteğin servise ulaşıp ulaşmadığı görülür.
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.Equals("/api/User/ShopierOsb", StringComparison.OrdinalIgnoreCase))
+    {
+        ShopierFileLogger.Info(
+            $"PIPELINE HIT. Method={context.Request.Method}, Scheme={context.Request.Scheme}, " +
+            $"Host={context.Request.Host}, Path={context.Request.Path}, ContentType={context.Request.ContentType}, " +
+            $"ContentLength={context.Request.ContentLength}, RemoteIp={context.Connection.RemoteIpAddress}");
+    }
+
+    await next();
+
+    if (context.Request.Path.Equals("/api/User/ShopierOsb", StringComparison.OrdinalIgnoreCase))
+        ShopierFileLogger.Info($"PIPELINE RESPONSE. StatusCode={context.Response.StatusCode}");
+});
+
+// HTTPS public reverse proxy'de sonlanıyor; uygulama sadece localhost:5224 dinliyor.
+// Burada UseHttpsRedirection kullanmak, proxy X-Forwarded-Proto aktarmıyorsa callback'i
+// controller'a ulaşmadan 307/308 ile geri çevirebilir.
 
 app.UseAuthentication();
 

@@ -12,10 +12,12 @@ namespace UserManagement.Controllers
     public class AuthController : ControllerBase
     {
         readonly IAuthService authService;
+        readonly IAgreementService agreementService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, IAgreementService agreementService)
         {
             this.authService = authService;
+            this.agreementService = agreementService;
         }
 
         [HttpPost("Login")]
@@ -32,7 +34,11 @@ namespace UserManagement.Controllers
         public async Task<IActionResult> Register([FromBody] User user)
         {
             var result = await authService.Register(user);
-
+            if (result.GetIsSuccess() == true && result.GetData() != null && user.AgreementAcceptances?.Count > 0)
+            {
+                user.AgreementAcceptances.ForEach(x => x.UserId = result.GetData()!.Id);
+                await agreementService.Accept(user.AgreementAcceptances, HttpContext.Connection.RemoteIpAddress?.ToString(), Request.Headers.UserAgent.FirstOrDefault());
+            }
             return new OkObjectResult(result);
         }
 
@@ -41,7 +47,11 @@ namespace UserManagement.Controllers
         public async Task<IActionResult> RegisterWithVoucher([FromBody] User user)
         {
             var result = await authService.RegisterWithVoucher(user);
-
+            if (result.GetIsSuccess() == true && result.GetData() != null && user.AgreementAcceptances?.Count > 0)
+            {
+                user.AgreementAcceptances.ForEach(x => x.UserId = result.GetData()!.Id);
+                await agreementService.Accept(user.AgreementAcceptances, HttpContext.Connection.RemoteIpAddress?.ToString(), Request.Headers.UserAgent.FirstOrDefault());
+            }
             return new OkObjectResult(result);
         }
 

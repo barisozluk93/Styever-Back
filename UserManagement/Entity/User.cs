@@ -46,5 +46,8 @@ namespace UserManagement.Entity
 
         [NotMapped]
         public Model.File? File { get; set; }
+
+        [NotMapped]
+        public List<Model.AgreementAcceptanceRequest> AgreementAcceptances { get; set; } = new();
     }
 }

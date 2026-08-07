@@ -189,6 +189,18 @@
       "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
     },
     {
+      "DownstreamPathTemplate": "/api3/Agreement/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5224
+        }
+      ],
+      "UpstreamPathTemplate": "/Agreement/{everything}",
+      "UpstreamHttpMethod": [ "Post", "Options", "Get", "Put", "Delete" ]
+    },
+    {
       "DownstreamPathTemplate": "/api3/File/{everything}",
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [

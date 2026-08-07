@@ -46,6 +46,57 @@ namespace UserManagement.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ShopierPayments",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Reference = table.Column<Guid>(type: "uuid", nullable: false),
+                    UserId = table.Column<long>(type: "bigint", nullable: true),
+                    PlanId = table.Column<long>(type: "bigint", nullable: false),
+                    MemoryId = table.Column<long>(type: "bigint", nullable: false),
+                    PurchaseType = table.Column<string>(type: "text", nullable: false),
+                    ProductId = table.Column<string>(type: "text", nullable: false),
+                    ProductUrl = table.Column<string>(type: "text", nullable: false),
+                    BuyerEmail = table.Column<string>(type: "text", nullable: false),
+                    GiftPayload = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<string>(type: "text", nullable: false),
+                    ShopierOrderId = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CompletedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ShopierPayments", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserAgreementAcceptances",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
+                    AgreementType = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
+                    Title = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Version = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    Language = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    Context = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    DocumentUrl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    ContentSnapshot = table.Column<string>(type: "text", nullable: true),
+                    RelatedReference = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    IpAddress = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    UserAgent = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    AcceptedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserAgreementAcceptances", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -294,7 +345,8 @@ namespace UserManagement.Migrations
                     { 38L, "MemoryScene.AddComment.Permission", false, true, "Hatıra Ekranı Yorum Yapma Yetkisi" },
                     { 39L, "MemoryScene.DeleteComment.Permission", false, true, "Hatıra Ekranı Yorum Silme Yetkisi" },
                     { 40L, "MemoryScene.Like.Permission", false, true, "Hatıra Ekranı Beğeni Yetkisi" },
-                    { 41L, "MemoryScene.Dislike.Permission", false, true, "Hatıra Ekranı Beğeni Silme Yetkisi" }
+                    { 41L, "MemoryScene.Dislike.Permission", false, true, "Hatıra Ekranı Beğeni Silme Yetkisi" },
+                    { 42L, "MemoryScene.ApproveComment.Permission", false, true, "Hatıra Ekranı Yorum Onaylama Yetkisi" }
                 });
 
             migrationBuilder.InsertData(
@@ -313,10 +365,10 @@ namespace UserManagement.Migrations
                 columns: new[] { "Id", "CreatedDate", "Email", "ExpirationDate", "FileId", "IsActive", "IsDeleted", "IsSystemData", "IsTrial", "Name", "Password", "Phone", "Salt", "Surname", "TrialExpirationDate", "Username" },
                 values: new object[,]
                 {
-                    { 1L, new DateTime(2026, 1, 25, 18, 12, 47, 583, DateTimeKind.Utc).AddTicks(6865), "super@test.com", new DateTime(2027, 1, 25, 18, 12, 47, 583, DateTimeKind.Utc).AddTicks(6873), null, true, false, true, false, "SuperAdmin", "DBD9DCE9DB51E56E1468B18F44233EB1FF625ADCECAAE2D7E9776BC714AF69D2A360B57CDB7C4E098C6225543BF83C50DAEC23A8DAADF9212BADF6F26760911C", "+905077352772", new byte[] { 3, 251, 182, 108, 1, 165, 5, 95, 117, 7, 42, 45, 196, 160, 190, 194, 65, 169, 48, 49, 99, 22, 120, 177, 165, 246, 57, 186, 94, 216, 59, 80, 48, 229, 210, 31, 5, 173, 219, 134, 83, 73, 90, 196, 220, 216, 163, 14, 219, 106, 52, 183, 13, 250, 15, 143, 154, 208, 85, 45, 29, 52, 13, 105 }, "SuperAdmin", new DateTime(2026, 2, 1, 18, 12, 47, 583, DateTimeKind.Utc).AddTicks(6867), "superadmin" },
-                    { 2L, new DateTime(2026, 1, 25, 18, 12, 47, 583, DateTimeKind.Utc).AddTicks(6898), "memory@test.com", new DateTime(2027, 1, 25, 18, 12, 47, 583, DateTimeKind.Utc).AddTicks(6899), 1L, true, false, true, false, "Memory", "DBD9DCE9DB51E56E1468B18F44233EB1FF625ADCECAAE2D7E9776BC714AF69D2A360B57CDB7C4E098C6225543BF83C50DAEC23A8DAADF9212BADF6F26760911C", "+905077352772", new byte[] { 3, 251, 182, 108, 1, 165, 5, 95, 117, 7, 42, 45, 196, 160, 190, 194, 65, 169, 48, 49, 99, 22, 120, 177, 165, 246, 57, 186, 94, 216, 59, 80, 48, 229, 210, 31, 5, 173, 219, 134, 83, 73, 90, 196, 220, 216, 163, 14, 219, 106, 52, 183, 13, 250, 15, 143, 154, 208, 85, 45, 29, 52, 13, 105 }, "User", new DateTime(2026, 2, 1, 18, 12, 47, 583, DateTimeKind.Utc).AddTicks(6898), "memoryuser" },
-                    { 3L, new DateTime(2026, 1, 25, 18, 12, 47, 583, DateTimeKind.Utc).AddTicks(6905), "tribute@test.com", new DateTime(2027, 1, 25, 18, 12, 47, 583, DateTimeKind.Utc).AddTicks(6906), 2L, true, false, true, false, "Tribute", "DBD9DCE9DB51E56E1468B18F44233EB1FF625ADCECAAE2D7E9776BC714AF69D2A360B57CDB7C4E098C6225543BF83C50DAEC23A8DAADF9212BADF6F26760911C", "+905077352772", new byte[] { 3, 251, 182, 108, 1, 165, 5, 95, 117, 7, 42, 45, 196, 160, 190, 194, 65, 169, 48, 49, 99, 22, 120, 177, 165, 246, 57, 186, 94, 216, 59, 80, 48, 229, 210, 31, 5, 173, 219, 134, 83, 73, 90, 196, 220, 216, 163, 14, 219, 106, 52, 183, 13, 250, 15, 143, 154, 208, 85, 45, 29, 52, 13, 105 }, "User", new DateTime(2026, 2, 1, 18, 12, 47, 583, DateTimeKind.Utc).AddTicks(6905), "tributeuser" },
-                    { 4L, new DateTime(2026, 1, 25, 18, 12, 47, 583, DateTimeKind.Utc).AddTicks(6909), "eternal@test.com", new DateTime(2027, 1, 25, 18, 12, 47, 583, DateTimeKind.Utc).AddTicks(6910), 3L, true, false, true, false, "Eternal", "DBD9DCE9DB51E56E1468B18F44233EB1FF625ADCECAAE2D7E9776BC714AF69D2A360B57CDB7C4E098C6225543BF83C50DAEC23A8DAADF9212BADF6F26760911C", "+905077352772", new byte[] { 3, 251, 182, 108, 1, 165, 5, 95, 117, 7, 42, 45, 196, 160, 190, 194, 65, 169, 48, 49, 99, 22, 120, 177, 165, 246, 57, 186, 94, 216, 59, 80, 48, 229, 210, 31, 5, 173, 219, 134, 83, 73, 90, 196, 220, 216, 163, 14, 219, 106, 52, 183, 13, 250, 15, 143, 154, 208, 85, 45, 29, 52, 13, 105 }, "User", new DateTime(2026, 2, 1, 18, 12, 47, 583, DateTimeKind.Utc).AddTicks(6909), "eternaluser" }
+                    { 1L, new DateTime(2026, 8, 6, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(32), "super@test.com", new DateTime(2027, 8, 6, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(40), null, true, false, true, false, "SuperAdmin", "DBD9DCE9DB51E56E1468B18F44233EB1FF625ADCECAAE2D7E9776BC714AF69D2A360B57CDB7C4E098C6225543BF83C50DAEC23A8DAADF9212BADF6F26760911C", "+905077352772", new byte[] { 3, 251, 182, 108, 1, 165, 5, 95, 117, 7, 42, 45, 196, 160, 190, 194, 65, 169, 48, 49, 99, 22, 120, 177, 165, 246, 57, 186, 94, 216, 59, 80, 48, 229, 210, 31, 5, 173, 219, 134, 83, 73, 90, 196, 220, 216, 163, 14, 219, 106, 52, 183, 13, 250, 15, 143, 154, 208, 85, 45, 29, 52, 13, 105 }, "SuperAdmin", new DateTime(2026, 8, 13, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(35), "superadmin" },
+                    { 2L, new DateTime(2026, 8, 6, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(65), "memory@test.com", new DateTime(2027, 8, 6, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(66), 1L, true, false, true, false, "Memory", "DBD9DCE9DB51E56E1468B18F44233EB1FF625ADCECAAE2D7E9776BC714AF69D2A360B57CDB7C4E098C6225543BF83C50DAEC23A8DAADF9212BADF6F26760911C", "+905077352772", new byte[] { 3, 251, 182, 108, 1, 165, 5, 95, 117, 7, 42, 45, 196, 160, 190, 194, 65, 169, 48, 49, 99, 22, 120, 177, 165, 246, 57, 186, 94, 216, 59, 80, 48, 229, 210, 31, 5, 173, 219, 134, 83, 73, 90, 196, 220, 216, 163, 14, 219, 106, 52, 183, 13, 250, 15, 143, 154, 208, 85, 45, 29, 52, 13, 105 }, "User", new DateTime(2026, 8, 13, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(65), "memoryuser" },
+                    { 3L, new DateTime(2026, 8, 6, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(72), "tribute@test.com", new DateTime(2027, 8, 6, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(73), 2L, true, false, true, false, "Tribute", "DBD9DCE9DB51E56E1468B18F44233EB1FF625ADCECAAE2D7E9776BC714AF69D2A360B57CDB7C4E098C6225543BF83C50DAEC23A8DAADF9212BADF6F26760911C", "+905077352772", new byte[] { 3, 251, 182, 108, 1, 165, 5, 95, 117, 7, 42, 45, 196, 160, 190, 194, 65, 169, 48, 49, 99, 22, 120, 177, 165, 246, 57, 186, 94, 216, 59, 80, 48, 229, 210, 31, 5, 173, 219, 134, 83, 73, 90, 196, 220, 216, 163, 14, 219, 106, 52, 183, 13, 250, 15, 143, 154, 208, 85, 45, 29, 52, 13, 105 }, "User", new DateTime(2026, 8, 13, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(72), "tributeuser" },
+                    { 4L, new DateTime(2026, 8, 6, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(77), "eternal@test.com", new DateTime(2027, 8, 6, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(77), 3L, true, false, true, false, "Eternal", "DBD9DCE9DB51E56E1468B18F44233EB1FF625ADCECAAE2D7E9776BC714AF69D2A360B57CDB7C4E098C6225543BF83C50DAEC23A8DAADF9212BADF6F26760911C", "+905077352772", new byte[] { 3, 251, 182, 108, 1, 165, 5, 95, 117, 7, 42, 45, 196, 160, 190, 194, 65, 169, 48, 49, 99, 22, 120, 177, 165, 246, 57, 186, 94, 216, 59, 80, 48, 229, 210, 31, 5, 173, 219, 134, 83, 73, 90, 196, 220, 216, 163, 14, 219, 106, 52, 183, 13, 250, 15, 143, 154, 208, 85, 45, 29, 52, 13, 105 }, "User", new DateTime(2026, 8, 13, 20, 55, 11, 855, DateTimeKind.Utc).AddTicks(77), "eternaluser" }
                 });
 
             migrationBuilder.InsertData(
@@ -487,7 +539,11 @@ namespace UserManagement.Migrations
                     { 161L, false, 38L, 4L },
                     { 162L, false, 39L, 4L },
                     { 163L, false, 40L, 4L },
-                    { 164L, false, 41L, 4L }
+                    { 164L, false, 41L, 4L },
+                    { 165L, false, 42L, 1L },
+                    { 166L, false, 42L, 2L },
+                    { 167L, false, 42L, 3L },
+                    { 168L, false, 42L, 4L }
                 });
 
             migrationBuilder.InsertData(
@@ -658,7 +714,11 @@ namespace UserManagement.Migrations
                     { 161L, false, 38L, 4L },
                     { 162L, false, 39L, 4L },
                     { 163L, false, 40L, 4L },
-                    { 164L, false, 41L, 4L }
+                    { 164L, false, 41L, 4L },
+                    { 165L, false, 42L, 1L },
+                    { 166L, false, 42L, 2L },
+                    { 167L, false, 42L, 3L },
+                    { 168L, false, 42L, 4L }
                 });
 
             migrationBuilder.InsertData(
@@ -688,9 +748,26 @@ namespace UserManagement.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ShopierPayments_Reference",
+                table: "ShopierPayments",
+                column: "Reference",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ShopierPayments_ShopierOrderId",
+                table: "ShopierPayments",
+                column: "ShopierOrderId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserAddresses_UserId",
                 table: "UserAddresses",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserAgreementAcceptances_UserId_AcceptedDate",
+                table: "UserAgreementAcceptances",
+                columns: new[] { "UserId", "AcceptedDate" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserPayments_UserId",
@@ -733,7 +810,13 @@ namespace UserManagement.Migrations
                 name: "RolePermissions");
 
             migrationBuilder.DropTable(
+                name: "ShopierPayments");
+
+            migrationBuilder.DropTable(
                 name: "UserAddresses");
+
+            migrationBuilder.DropTable(
+                name: "UserAgreementAcceptances");
 
             migrationBuilder.DropTable(
                 name: "UserPayments");

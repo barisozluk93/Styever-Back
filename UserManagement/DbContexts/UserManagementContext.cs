@@ -19,9 +19,15 @@ namespace UserManagement.DbContexts
         public DbSet<UserAddress> UserAddresses { get; set; }
         public DbSet<UserPayment> UserPayments { get; set; }
         public DbSet<UserVoucher> UserVouchers { get; set; }
+        public DbSet<ShopierPayment> ShopierPayments { get; set; }
+        public DbSet<UserAgreementAcceptance> UserAgreementAcceptances { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<ShopierPayment>().HasIndex(x => x.Reference).IsUnique();
+            modelBuilder.Entity<ShopierPayment>().HasIndex(x => x.ShopierOrderId).IsUnique();
+            modelBuilder.Entity<UserAgreementAcceptance>().HasIndex(x => new { x.UserId, x.AcceptedDate });
+
             modelBuilder.Entity<Permission>().HasData(
                 new Permission { Id = 1, Name = "Yetki Ekranı Sayfalama Yetkisi", Code = "PermissionScene.Paging.Permission", IsDeleted = false, IsSystemData = true },
                 new Permission { Id = 2, Name = "Yetki Ekranı Kayıt Yetkisi", Code = "PermissionScene.Save.Permission", IsDeleted = false, IsSystemData = true },
