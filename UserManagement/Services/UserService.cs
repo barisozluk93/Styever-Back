@@ -119,7 +119,7 @@ namespace UserManagement.Services
 
                         UserPayment payment = new UserPayment();
                         payment.UserId = userId;
-                        payment.Price = planId == 2 ? 359.00 : planId == 3 ? 559.00 : 959.00;
+                        payment.Price = planId == 2 ? 499.00 : planId == 3 ? 659.00 : 1299.00;
                         payment.PlanId = planId;
                         payment.PaymentDate = DateTime.UtcNow;
                         payment.IsDeleted = false;
@@ -396,7 +396,7 @@ Styever Ekibi";
 
                         UserPayment payment = new UserPayment();
                         payment.UserId = userId;
-                        payment.Price = user.Roles.First() == 2 ? 359.00 : user.Roles.First() == 3 ? 559.00 : 959.00;
+                        payment.Price = user.Roles.First() == 2 ? 499.00 : user.Roles.First() == 3 ? 6999.00 : 1299.00;
                         payment.PlanId = user.Roles.First();
                         payment.PaymentDate = DateTime.UtcNow;
                         payment.IsDeleted = false;

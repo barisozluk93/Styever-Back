@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using UserManagement.DbContexts;
@@ -11,9 +12,11 @@ using UserManagement.DbContexts;
 namespace UserManagement.Migrations
 {
     [DbContext(typeof(UserManagementContext))]
-    partial class UserManagementContextModelSnapshot : ModelSnapshot
+    [Migration("20260808130305_RoleIsimleriDegistirildi")]
+    partial class RoleIsimleriDegistirildi
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

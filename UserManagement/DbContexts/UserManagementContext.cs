@@ -77,9 +77,9 @@ namespace UserManagement.DbContexts
 
             modelBuilder.Entity<Role>().HasData(
                 new Role { Id = 1, Name = "SuperAdmin", IsDeleted = false, IsSystemData = true },
-                new Role { Id = 2, Name = "Memory", IsDeleted = false, IsSystemData = true },
-                new Role { Id = 3, Name = "Tribute", IsDeleted = false, IsSystemData = true },
-                new Role { Id = 4, Name = "Eternal", IsDeleted = false, IsSystemData = true }
+                new Role { Id = 2, Name = "Origin", IsDeleted = false, IsSystemData = true },
+                new Role { Id = 3, Name = "Heart", IsDeleted = false, IsSystemData = true },
+                new Role { Id = 4, Name = "Family", IsDeleted = false, IsSystemData = true }
             );
 
             modelBuilder.Entity<RolePermission>().HasData(
@@ -280,12 +280,12 @@ namespace UserManagement.DbContexts
                 new User
                 {
                     Id = 2,
-                    Name = "Memory",
+                    Name = "Origin",
                     Surname = "User",
-                    Email = "memory@test.com",
+                    Email = "origin@test.com",
                     Password = "DBD9DCE9DB51E56E1468B18F44233EB1FF625ADCECAAE2D7E9776BC714AF69D2A360B57CDB7C4E098C6225543BF83C50DAEC23A8DAADF9212BADF6F26760911C",
                     Phone = "+905077352772",
-                    Username = "memoryuser",
+                    Username = "originuser",
                     IsActive = true,
                     CreatedDate = DateTime.UtcNow,
                     TrialExpirationDate = DateTime.UtcNow.AddDays(7),
@@ -299,12 +299,12 @@ namespace UserManagement.DbContexts
                 new User
                 {
                     Id = 3,
-                    Name = "Tribute",
+                    Name = "Heart",
                     Surname = "User",
-                    Email = "tribute@test.com",
+                    Email = "heart@test.com",
                     Password = "DBD9DCE9DB51E56E1468B18F44233EB1FF625ADCECAAE2D7E9776BC714AF69D2A360B57CDB7C4E098C6225543BF83C50DAEC23A8DAADF9212BADF6F26760911C",
                     Phone = "+905077352772",
-                    Username = "tributeuser",
+                    Username = "heartuser",
                     CreatedDate = DateTime.UtcNow,
                     TrialExpirationDate = DateTime.UtcNow.AddDays(7),
                     ExpirationDate = DateTime.UtcNow.AddYears(1),
@@ -318,12 +318,12 @@ namespace UserManagement.DbContexts
                 new User
                 {
                     Id = 4,
-                    Name = "Eternal",
+                    Name = "Family",
                     Surname = "User",
-                    Email = "eternal@test.com",
+                    Email = "family@test.com",
                     Password = "DBD9DCE9DB51E56E1468B18F44233EB1FF625ADCECAAE2D7E9776BC714AF69D2A360B57CDB7C4E098C6225543BF83C50DAEC23A8DAADF9212BADF6F26760911C",
                     Phone = "+905077352772",
-                    Username = "eternaluser",
+                    Username = "familyuser",
                     CreatedDate = DateTime.UtcNow,
                     TrialExpirationDate = DateTime.UtcNow.AddDays(7),
                     ExpirationDate = DateTime.UtcNow.AddYears(1),
