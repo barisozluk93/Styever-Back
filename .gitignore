@@ -4,7 +4,7 @@
 # Build outputs
 **/bin/
 **/obj/
-
+**/obj/**
 # Rider
 .idea/
 
