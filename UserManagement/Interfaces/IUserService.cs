@@ -1,4 +1,4 @@
-﻿using UserManagement.Entity;
+using UserManagement.Entity;
 using UserManagement.Model;
 
 namespace UserManagement.Interfaces
@@ -23,5 +23,12 @@ namespace UserManagement.Interfaces
         Task<Result<bool>> BuyPackage(long userId, long planId, long memoryId);
         Task<Result<UserVoucher>> BuyGiftPackage(UserVoucher userVoucher);
         Task<Result<UserVoucher>> VoucherControl(string voucher);
+        Task SendMailAsync(
+            string to,
+            string subject,
+            string htmlBody,
+            string textBody,
+            IEnumerable<MailAttachment>? attachments = null,
+            CancellationToken cancellationToken = default);
     }
 }

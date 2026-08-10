@@ -39,6 +39,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAgreementService, AgreementService>();
 builder.Services.Configure<ShopierOptions>(Configuration.GetSection("Shopier"));
 builder.Services.AddScoped<IShopierPaymentService, ShopierPaymentService>();
+builder.Services.AddScoped<IPurchaseDocumentService, PurchaseDocumentService>();
 builder.Services.AddTransient<IAuthService, AuthService>();
 builder.Services.AddTransient<ITokenService, TokenService>();
 builder.Services.AddHostedService<UserDailyWorker>();

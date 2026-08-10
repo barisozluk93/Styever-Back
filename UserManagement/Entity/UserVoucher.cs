@@ -16,6 +16,9 @@ namespace UserManagement.Entity
         public double Price { get; set; }
 
         public string? SenderEmail {  get; set; }
+
+        [NotMapped]
+        public string? SenderFullName { get; set; }
         public string ReceiverEmail { get; set; }
         public string Message { get; set; }
         public Guid? Voucher { get; set; }

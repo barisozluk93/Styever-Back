@@ -19,17 +19,20 @@ namespace UserManagement.Services
         private readonly IUserService _userService;
         private readonly ShopierOptions _options;
         private readonly ILogger<ShopierPaymentService> _logger;
+        private readonly IPurchaseDocumentService _purchaseDocumentService;
 
         public ShopierPaymentService(
             UserManagementContext db,
             IUserService userService,
             IOptions<ShopierOptions> options,
-            ILogger<ShopierPaymentService> logger)
+            ILogger<ShopierPaymentService> logger,
+            IPurchaseDocumentService purchaseDocumentService)
         {
             _db = db;
             _userService = userService;
             _options = options.Value;
             _logger = logger;
+            _purchaseDocumentService = purchaseDocumentService;
         }
 
         public async Task<Result<ShopierCheckoutResponse>> StartPay(long userId)
@@ -117,22 +120,43 @@ namespace UserManagement.Services
                 return Fail(result, "Hediye paketi için Shopier ürün eşleştirmesi bulunamadı.");
             }
 
-            var buyerEmail = voucher.UserId.HasValue
-                ? await _db.Users
-                    .Where(x => x.Id == voucher.UserId.Value && !x.IsDeleted)
+            // Guest istemciler eski sürümlerde UserId=0 gönderebilir.
+            // 0 ve negatif değerleri guest olarak normalize ediyoruz.
+            long? giftUserId = voucher.UserId.HasValue && voucher.UserId.Value > 0
+                ? voucher.UserId.Value
+                : null;
+
+            string? buyerEmail;
+
+            if (giftUserId.HasValue)
+            {
+                buyerEmail = await _db.Users
+                    .AsNoTracking()
+                    .Where(x => x.Id == giftUserId.Value && !x.IsDeleted)
                     .Select(x => x.Email)
-                    .FirstOrDefaultAsync()
-                : voucher.SenderEmail;
+                    .FirstOrDefaultAsync();
+
+                if (string.IsNullOrWhiteSpace(buyerEmail))
+                    return Fail(result, "Ödeme yapan kullanıcı bulunamadı veya e-posta adresi tanımlı değil.");
+            }
+            else
+            {
+                buyerEmail = voucher.SenderEmail;
+            }
 
             if (string.IsNullOrWhiteSpace(buyerEmail))
                 return Fail(result, "Ödeme yapan kişinin e-posta adresi zorunludur.");
 
-            if (voucher.UserId.HasValue)
+            voucher.UserId = giftUserId;
+
+            // Login kullanıcı için bekleyen ödeme tekrar kullanılabilir. Guest'te kullanıcı
+            // anahtarı olmadığı için yeni reference üretilir.
+            if (giftUserId.HasValue)
             {
                 var existing = await _db.ShopierPayments
                     .AsNoTracking()
                     .Where(x =>
-                        x.UserId == voucher.UserId.Value &&
+                        x.UserId == giftUserId.Value &&
                         x.PurchaseType == "Gift" &&
                         x.PlanId == voucher.PlanId &&
                         x.Status == "Pending" &&
@@ -147,7 +171,7 @@ namespace UserManagement.Services
             var payment = new ShopierPayment
             {
                 Reference = Guid.NewGuid(),
-                UserId = voucher.UserId,
+                UserId = giftUserId,
                 PlanId = voucher.PlanId,
                 PurchaseType = "Gift",
                 ProductId = product.ProductId,
@@ -405,23 +429,36 @@ namespace UserManagement.Services
 
             try
             {
-                var requiredAgreementCount = await _db.UserAgreementAcceptances
-                    .AsNoTracking()
-                    .CountAsync(x =>
-                        x.RelatedReference == payment.Reference.ToString() &&
-                        (x.AgreementType == "PreInformationForm" ||
-                         x.AgreementType == "DistanceSalesAgreement") &&
-                        !x.IsDeleted,
-                        cancellationToken);
+                // Guest Gift işleminde kullanıcı hesabı bulunmadığı için Agreement tablosuna
+                // kayıt atmıyoruz. Buna rağmen ödeme ekranındaki checkbox ile kullanıcı
+                // sözleşmeleri onaylamadan Shopier'e yönlendirilmemelidir.
+                // Login kullanıcıların tüm ödeme tiplerinde DB agreement kaydı zorunludur.
+                var isGuestGift = payment.PurchaseType == "Gift" && !payment.UserId.HasValue;
 
-                ShopierFileLogger.Info($"Sozlesme kontrolu: Reference={payment.Reference}, AgreementCount={requiredAgreementCount}");
-
-                if (requiredAgreementCount < 2)
+                if (!isGuestGift)
                 {
-                    await ResetPending(payment.Id, cancellationToken);
-                    response.Message = "Satış sözleşmesi onayları bulunamadı.";
-                    ShopierFileLogger.Warning(response.Message + $" Reference={payment.Reference}");
-                    return response;
+                    var requiredAgreementCount = await _db.UserAgreementAcceptances
+                        .AsNoTracking()
+                        .CountAsync(x =>
+                            x.RelatedReference == payment.Reference.ToString() &&
+                            (x.AgreementType == "PreInformationForm" ||
+                             x.AgreementType == "DistanceSalesAgreement") &&
+                            !x.IsDeleted,
+                            cancellationToken);
+
+                    ShopierFileLogger.Info($"Sozlesme kontrolu: Reference={payment.Reference}, AgreementCount={requiredAgreementCount}");
+
+                    if (requiredAgreementCount < 2)
+                    {
+                        await ResetPending(payment.Id, cancellationToken);
+                        response.Message = "Satış sözleşmesi onayları bulunamadı.";
+                        ShopierFileLogger.Warning(response.Message + $" Reference={payment.Reference}");
+                        return response;
+                    }
+                }
+                else
+                {
+                    ShopierFileLogger.Info($"Guest Gift: Agreement DB kontrolu atlandi. Reference={payment.Reference}");
                 }
 
                 if (payment.PurchaseType == "Gift")
@@ -479,14 +516,43 @@ namespace UserManagement.Services
                     }
                 }
 
+                var completedDate = DateTime.UtcNow;
+
                 await _db.ShopierPayments
                     .Where(x => x.Id == payment.Id)
                     .ExecuteUpdateAsync(
                         setters => setters
                             .SetProperty(x => x.Status, "Completed")
                             .SetProperty(x => x.ShopierOrderId, orderId)
-                            .SetProperty(x => x.CompletedDate, DateTime.UtcNow),
+                            .SetProperty(x => x.CompletedDate, completedDate),
                         cancellationToken);
+
+                // PDF sözleşmeler ödeme başarıyla kesinleştikten sonra ödeme yapan
+                // kişinin e-posta adresine gönderilir. E-posta problemi ödeme
+                // işlemini geri almamalı; hata loglanır ve OSB success döner.
+                payment.Status = "Completed";
+                payment.ShopierOrderId = orderId;
+                payment.CompletedDate = completedDate;
+
+                try
+                {
+                    await _purchaseDocumentService.SendPurchaseDocumentsAsync(
+                        payment,
+                        orderId,
+                        cancellationToken);
+                }
+                catch (Exception mailException)
+                {
+                    _logger.LogError(
+                        mailException,
+                        "Ödeme tamamlandı ancak satış sözleşmeleri e-posta ile gönderilemedi. Reference: {Reference}, Email: {Email}",
+                        payment.Reference,
+                        payment.BuyerEmail);
+
+                    ShopierFileLogger.Error(
+                        $"CONTRACT EMAIL FAILED. Reference={payment.Reference}, Email={payment.BuyerEmail}",
+                        mailException);
+                }
 
                 response.IsProcessed = true;
                 response.Message = "Shopier ödemesi başarıyla tamamlandı.";

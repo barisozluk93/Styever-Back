@@ -1,4 +1,4 @@
-﻿using MailKit.Net.Smtp;
+using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -154,7 +154,9 @@ namespace UserManagement.Services
         {
             var senderName = user != null
                 ? $"{user.Name} {user.Surname}"
-                : userVoucher.SenderEmail;
+                : (!string.IsNullOrWhiteSpace(userVoucher.SenderFullName)
+                    ? userVoucher.SenderFullName
+                    : userVoucher.SenderEmail);
 
             var receiverName = "Değerli Dostumuz";
             var petName = "Dostunuz";
@@ -316,6 +318,69 @@ Styever Ekibi";
             await smtp.SendAsync(emailMessage);
             smtp.Disconnect(true);
         }
+        public async Task SendMailAsync(
+            string to,
+            string subject,
+            string htmlBody,
+            string textBody,
+            IEnumerable<MailAttachment>? attachments = null,
+            CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(to))
+                throw new ArgumentException("Alıcı e-posta adresi zorunludur.", nameof(to));
+
+            var builder = new BodyBuilder
+            {
+                HtmlBody = htmlBody,
+                TextBody = textBody
+            };
+
+            if (attachments != null)
+            {
+                foreach (var attachment in attachments)
+                {
+                    if (attachment.Content == null || attachment.Content.Length == 0)
+                        continue;
+
+                    var mimeType = string.IsNullOrWhiteSpace(attachment.ContentType)
+                        ? "application/octet-stream"
+                        : attachment.ContentType;
+
+                    var parts = mimeType.Split('/', 2);
+                    var contentType = parts.Length == 2
+                        ? new ContentType(parts[0], parts[1])
+                        : new ContentType("application", "octet-stream");
+
+                    builder.Attachments.Add(
+                        attachment.FileName,
+                        attachment.Content,
+                        contentType);
+                }
+            }
+
+            var emailMessage = new MimeMessage();
+            emailMessage.Sender = MailboxAddress.Parse(_mailSettings.Mail);
+            emailMessage.From.Add(MailboxAddress.Parse(_mailSettings.Mail));
+            emailMessage.To.Add(MailboxAddress.Parse(to));
+            emailMessage.Subject = subject;
+            emailMessage.Body = builder.ToMessageBody();
+
+            using var smtp = new SmtpClient();
+            await smtp.ConnectAsync(
+                _mailSettings.Host,
+                _mailSettings.Port,
+                SecureSocketOptions.SslOnConnect,
+                cancellationToken);
+
+            await smtp.AuthenticateAsync(
+                _mailSettings.Mail,
+                _mailSettings.Password,
+                cancellationToken);
+
+            await smtp.SendAsync(emailMessage, cancellationToken);
+            await smtp.DisconnectAsync(true, cancellationToken);
+        }
+
         public async Task<Result<UserVoucher>> VoucherControl(string voucher)
         {
             var result = new Result<UserVoucher>();
