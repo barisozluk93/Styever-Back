@@ -330,7 +330,7 @@ namespace UserManagement.Controllers
 
         [HttpDelete("UserAddressDelete/{id}")]
         [Authorize]
-        [HasPermission("ProfileScene.DeleteAddress.Permission")]
+        [HasPermission("ProfileScene.DeletAddress.Permission")]
         public async Task<IActionResult> UserAddressDelete(long id)
         {
             var result = await _userService.UserAddressDelete(id);

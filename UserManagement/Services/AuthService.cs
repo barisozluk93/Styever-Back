@@ -343,7 +343,7 @@ namespace UserManagement.Services
                     var userVoucher = await _dbContext.UserVouchers.Where(x => !x.IsDeleted && x.Voucher == user.Voucher).FirstOrDefaultAsync();
                     if (userVoucher != null)
                     {
-                        if (!_dbContext.Users.Where(x => x.Username == user.Username).Any())
+                        if (!_dbContext.Users.Where(x => x.Username == user.Username && !x.IsDeleted).Any())
                         {
                             var hashedPassword = HashPasword(user.Password, out var salt);
 
@@ -434,7 +434,7 @@ namespace UserManagement.Services
             {
                 try
                 {
-                    if (!_dbContext.Users.Where(x => x.Username == user.Username).Any())
+                    if (!_dbContext.Users.Where(x => x.Username == user.Username && !x.IsDeleted).Any())
                     {
                         var hashedPassword = HashPasword(user.Password, out var salt);
 
