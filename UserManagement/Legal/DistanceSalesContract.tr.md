@@ -4,7 +4,7 @@
 
 ### 1. Satıcı Bilgileri
 
-- Adı Soyadı / Resmi Ünvanı: ESMA ESRA KILIÇ (Styever)
+- Resmi Ünvanı: Styever
 - İş Yeri Adresi: ALACAATLI MAH. 3381/2 SK. A-4 ÇANKAYA / ANKARA
 - Vergi Dairesi ve No: DOĞANBEY VERGİ DAİRESİ / 0990426667
 - E-posta Adresi: info\@styever.com
@@ -35,7 +35,7 @@ Alıcı, hizmete ilişkin her türlü talep ve şikayetini info\@styever.com adr
 
 ### 1.1. Satıcı Bilgileri
 
-- Adı Soyadı / Resmi Ünvanı: ESMA ESRA KILIÇ
+- Resmi Ünvanı: Styever
 - Marka İsmi: Styever
 - İş Yeri Adresi: ALACAATLI MAH. 3381/2 SK. A-4 ÇANKAYA / ANKARA
 - T.C. Kimlik Numarası: 50335068022
@@ -50,7 +50,7 @@ Satıcı'ya ait www\.styever.com internet sitesi üzerinden elektronik ortamda s
 
 İşbu sözleşmenin uygulanmasında ve yorumlanmasında, aşağıda yazılı terimler karşılarındaki yazılı açıklamaları ifade edeceklerdir:
 
-- Satıcı: ESMA ESRA KILIÇ (Styever)
+- Satıcı: Styever
 - Alıcı: İnternet sitesini kullanarak dijital hizmet, yazılım ve anı sayfası alanı satın alan gerçek veya tüzel kişi.
 - Hizmet: Alıcı’nın platform üzerinden satın aldığı, anında ifa edilen dijital içerikleri, yazılım fonksiyonlarını ve barındırma hizmetlerini kapsayan soyut servisler.
 - Sözleşme: Satıcı ve Alıcı arasında kurulan işbu Mesafeli Satış Sözleşmesi.
