@@ -73,7 +73,6 @@ namespace UserManagement.Controllers
 
         [HttpDelete("Delete/{id}")]
         [Authorize]
-        [HasPermission("UserScene.Delete.Permission")]
         public async Task<IActionResult> Delete(long id)
         {
             var result = await _userService.Delete(id);
