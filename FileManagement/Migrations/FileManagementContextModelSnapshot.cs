@@ -59,36 +59,36 @@ namespace FileManagement.Migrations
                         new
                         {
                             Id = 1L,
-                            ContentType = "image/jpeg",
-                            Extension = ".jpeg",
+                            ContentType = "image/jpg",
+                            Extension = ".jpg",
                             IsDeleted = false,
                             Length = 52501m,
                             Name = "68a1a7ccdfe3241d0aa9f9ae_REF23",
-                            Path = "C:/inetpub/api/FileManagement\\Uploads/Avatars\\68a1a7ccdfe3241d0aa9f9ae_REF23"
+                            Path = "C:/inetpub/api/FileManagement\\Uploads/Avatars\\68a1a7ccdfe3241d0aa9f9ae_REF23.jpg"
                         },
                         new
                         {
                             Id = 2L,
-                            ContentType = "image/jpeg",
-                            Extension = ".jpeg",
+                            ContentType = "image/jpg",
+                            Extension = ".jpg",
                             IsDeleted = false,
                             Length = 52501m,
                             Name = "68a1a7ccdfe3241d0aa9f9ae_REF28",
-                            Path = "C:/inetpub/api/FileManagement\\Uploads/Avatars\\68a1a7ccdfe3241d0aa9f9ae_REF28"
+                            Path = "C:/inetpub/api/FileManagement\\Uploads/Avatars\\68a1a7ccdfe3241d0aa9f9ae_REF28.jpg"
                         },
                         new
                         {
                             Id = 3L,
-                            ContentType = "image/jpeg",
-                            Extension = ".jpeg",
+                            ContentType = "image/jpg",
+                            Extension = ".jpg",
                             IsDeleted = false,
                             Length = 52501m,
                             Name = "68a1a7ccdfe3241d0aa9f9ae_REF29",
-                            Path = "C:/inetpub/api/FileManagement\\Uploads/Avatars\\68a1a7ccdfe3241d0aa9f9ae_REF29"
+                            Path = "C:/inetpub/api/FileManagement\\Uploads/Avatars\\68a1a7ccdfe3241d0aa9f9ae_REF29.jpg"
                         },
                         new
                         {
-                            Id = 7L,
+                            Id = 4L,
                             ContentType = "image/jpg",
                             Extension = ".jpg",
                             IsDeleted = false,
@@ -98,7 +98,7 @@ namespace FileManagement.Migrations
                         },
                         new
                         {
-                            Id = 8L,
+                            Id = 5L,
                             ContentType = "image/jpg",
                             Extension = ".jpg",
                             IsDeleted = false,
@@ -108,7 +108,7 @@ namespace FileManagement.Migrations
                         },
                         new
                         {
-                            Id = 9L,
+                            Id = 6L,
                             ContentType = "image/jpg",
                             Extension = ".jpg",
                             IsDeleted = false,

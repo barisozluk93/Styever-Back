@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using MemoryManagement.Entity;
 using MemoryManagement.Model;
 
@@ -22,6 +22,7 @@ namespace MemoryManagement.Interfaces
         Task<Result<MemoryYoutubeLink>> MemoryYoutubeLinkAdd(MemoryYoutubeLink memoryFile);
         Task<Result<MemoryYoutubeLink>> MemoryYoutubeLinkDelete(long id);
         Task<Result<long>> GetMemoryCount(long userId);
+        Task<Result<DashboardMemoryStats>> GetDashboardStats(DateTime? startDate, DateTime? endDate);
         Task<Result<bool>> SetMemoryFileIsPrimary(long memoryFileId);
         Task<Result<MemoryCandle>> LightCandle(MemoryCandle memoryCandle);
         Task<Result<MemoryCandle>> UpdateCandle(MemoryCandle memoryCandle);

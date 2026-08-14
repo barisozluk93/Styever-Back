@@ -37,6 +37,8 @@ builder.Services.AddScoped<IPermissionService, PermissionService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAgreementService, AgreementService>();
+builder.Services.AddScoped<IPlanService, PlanService>();
+builder.Services.AddScoped<ILegalContentService, LegalContentService>();
 builder.Services.Configure<ShopierOptions>(Configuration.GetSection("Shopier"));
 builder.Services.AddScoped<IShopierPaymentService, ShopierPaymentService>();
 builder.Services.AddScoped<IPurchaseDocumentService, PurchaseDocumentService>();

@@ -94,6 +94,10 @@ namespace FileManagement.Services
                     {
                         filePath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", "Memories", Guid.NewGuid().ToString() + Path.GetExtension(file.FileName));
                     }
+                    else if (type == 3)
+                    {
+                        filePath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", "Articles", Guid.NewGuid().ToString() + Path.GetExtension(file.FileName));
+                    }
 
                     Entity.File dbItem = new Entity.File();
                     dbItem.Name = file.FileName;

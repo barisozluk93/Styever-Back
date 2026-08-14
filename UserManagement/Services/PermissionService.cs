@@ -19,34 +19,32 @@ namespace UserManagement.Services
         public async Task<Result<PagingResult<PagedList<Permission>>>> Paginate(PagingParameter pagingParameter)
         {
             var result = new Result<PagingResult<PagedList<Permission>>>();
-
-            string lowerFilterText = string.IsNullOrEmpty(pagingParameter.FilterText) ? null : pagingParameter.FilterText.ToLower();
-
-            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            try
             {
-                try
+                var queryable = _dbContext.Permissions.AsNoTracking().AsQueryable();
+                if (!string.IsNullOrWhiteSpace(pagingParameter.FilterText))
                 {
-                    var queryable = _dbContext.Permissions.Where(x => (String.IsNullOrEmpty(lowerFilterText) || (x.Name.ToLower().Contains(lowerFilterText))));
-                    var pagination = PagedList<Permission>.ToPagedList(queryable, pagingParameter.PageNumber, pagingParameter.PageSize);
-
-                    result.SetData(new PagingResult<PagedList<Permission>> ()
-                    {
-                        Items = pagination,
-                        TotalCount = pagination.TotalCount,
-                    });
-
-                    result.SetMessage("İşlem başarı ile gerçekleşti.");
+                    var filter = pagingParameter.FilterText.ToLower();
+                    queryable = queryable.Where(x => x.Name.ToLower().Contains(filter) || x.Code.ToLower().Contains(filter));
                 }
-                catch (Exception ex)
-                {
-                    result.SetIsSuccess(false);
-                    result.SetMessage(ex.Message);
-                }
+                if (!string.IsNullOrWhiteSpace(pagingParameter.Name))
+                    queryable = queryable.Where(x => x.Name.ToLower().Contains(pagingParameter.Name.ToLower()));
+                if (!string.IsNullOrWhiteSpace(pagingParameter.Code))
+                    queryable = queryable.Where(x => x.Code.ToLower().Contains(pagingParameter.Code.ToLower()));
+                if (pagingParameter.IsDeleted.HasValue)
+                    queryable = queryable.Where(x => x.IsDeleted == pagingParameter.IsDeleted.Value);
+
+                var pagination = PagedList<Permission>.ToPagedList(queryable.OrderByDescending(x => x.Id), pagingParameter.PageNumber, pagingParameter.PageSize);
+                result.SetData(new PagingResult<PagedList<Permission>>() { Items = pagination, TotalCount = pagination.TotalCount });
+                result.SetMessage("İşlem başarı ile gerçekleşti.");
             }
-
+            catch (Exception ex)
+            {
+                result.SetIsSuccess(false);
+                result.SetMessage(ex.Message);
+            }
             return result;
         }
-
         public async Task<Result<List<Permission>>> GetPermissions()
         {
             var result = new Result<List<Permission>>();

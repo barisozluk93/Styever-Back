@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MemoryManagement.Authorization;
 using MemoryManagement.Entity;
@@ -81,6 +81,11 @@ namespace MemoryManagement.Controllers
             var result = await _memoryService.GetById(id);
             return new OkObjectResult(result);
         }
+
+        [HttpGet("DashboardStats")]
+        [Authorize]
+        [HasPermission("UserScene.Paging.Permission")]
+        public async Task<IActionResult> DashboardStats([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate) => new OkObjectResult(await _memoryService.GetDashboardStats(startDate, endDate));
 
         [HttpGet("GetMemoryCount/{userId}")]
         [Authorize]

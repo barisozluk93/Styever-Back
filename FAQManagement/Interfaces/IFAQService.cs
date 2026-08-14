@@ -1,12 +1,1 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using FAQManagement.Model;
-using FAQManagement.Entity;
-
-namespace FAQManagement.Interfaces
-{
-    public interface IFAQService
-    {
-        Task<Result<List<FAQ>>> GetAll();
-
-    }
-}
+using FAQManagement.Entity; using FAQManagement.Model; namespace FAQManagement.Interfaces { public interface IFAQService { Task<Result<List<FAQ>>> GetAll(); Task<Result<PagingResult<PagedList<FAQ>>>> Paginate(PagingParameter p); Task<Result<FAQ>> Save(FAQ item); Task<Result<FAQ>> Update(FAQ item); Task<Result<FAQ>> Delete(long id); } }

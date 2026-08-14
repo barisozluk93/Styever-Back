@@ -57,6 +57,23 @@ namespace ReportContentManagement.Services
             return result;
         }
 
+
+        public async Task<Result<long>> GetDashboardStats()
+        {
+            var result = new Result<long>();
+            try
+            {
+                result.SetData(await _dbContext.ReportContent.AsNoTracking().LongCountAsync(x => !x.IsDeleted));
+                result.SetMessage("İşlem başarı ile gerçekleşti.");
+            }
+            catch (Exception ex)
+            {
+                result.SetIsSuccess(false);
+                result.SetMessage(ex.Message);
+            }
+            return result;
+        }
+
         private async Task SendMessage(ReportContent reportContent)
         {
             string message =

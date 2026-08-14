@@ -1,4 +1,4 @@
-﻿using ArticleManagement.DbContexts;
+using ArticleManagement.DbContexts;
 using ArticleManagement.Entity;
 using ArticleManagement.Interfaces;
 using ArticleManagement.Model;
@@ -10,6 +10,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Data;
 using System.Diagnostics;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Net.Http.Headers;
 using System.Reflection;
@@ -39,7 +40,7 @@ namespace ArticleManagement.Services
                     var article = await _dbContext.Articles.Where(x => x.Id == id && !x.IsDeleted).FirstOrDefaultAsync();
                     if (article != null)
                     {
-                        article.File = GetFile(article.FileId, token).Result;
+                        article.File = await GetFile(article.FileId, token);
 
                         result.SetData(article);
                         result.SetMessage("İşlem başarı ile gerçekleşti.");
@@ -53,6 +54,8 @@ namespace ArticleManagement.Services
                 catch (Exception ex)
                 {
                     transaction.Rollback();
+                    result.SetIsSuccess(false);
+                    result.SetMessage(ex.Message);
                 }
             }
 
@@ -98,12 +101,49 @@ namespace ArticleManagement.Services
         }
 
         
+        public async Task<Result<PagingResult<PagedList<Article>>>> Paginate(PagingParameter p, string token)
+        {
+            var r = new Result<PagingResult<PagedList<Article>>>();
+            try
+            {
+                var q = _dbContext.Articles.AsNoTracking().AsQueryable();
+
+                if (!string.IsNullOrWhiteSpace(p.FilterText))
+                {
+                    var f = p.FilterText.ToLower();
+                    q = q.Where(x => x.Header.ToLower().Contains(f) || x.HeaderEn.ToLower().Contains(f) || x.SubHeader.ToLower().Contains(f) || x.SubHeaderEn.ToLower().Contains(f));
+                }
+                if (!string.IsNullOrWhiteSpace(p.Header)) q = q.Where(x => x.Header.ToLower().Contains(p.Header.ToLower()));
+                if (!string.IsNullOrWhiteSpace(p.HeaderEn)) q = q.Where(x => x.HeaderEn.ToLower().Contains(p.HeaderEn.ToLower()));
+                if (!string.IsNullOrWhiteSpace(p.SubHeader)) q = q.Where(x => x.SubHeader.ToLower().Contains(p.SubHeader.ToLower()));
+                if (!string.IsNullOrWhiteSpace(p.SubHeaderEn)) q = q.Where(x => x.SubHeaderEn.ToLower().Contains(p.SubHeaderEn.ToLower()));
+                if (p.IsDeleted.HasValue) q = q.Where(x => x.IsDeleted == p.IsDeleted.Value);
+                var pagination = PagedList<Article>.ToPagedList(q.OrderByDescending(x => x.Id), p.PageNumber, p.PageSize);
+
+                pagination.ForEach(x => x.File = GetFile(x.FileId, token).Result);
+
+                r.SetData(new PagingResult<PagedList<Article>>()
+                {
+                    Items = pagination,
+                    TotalCount = pagination.TotalCount,
+                });
+
+                r.SetMessage("İşlem başarı ile gerçekleşti.");
+            }
+            catch (Exception ex) { r.SetIsSuccess(false); r.SetMessage(ex.Message); }
+            return r;
+        }
+        public async Task<Result<Article>> Save(Article item){var r=new Result<Article>();try{item.Id=0;item.IsDeleted=false;_dbContext.Articles.Add(item);await _dbContext.SaveChangesAsync();r.SetData(item);r.SetMessage("İşlem başarı ile gerçekleşti.");}catch(Exception ex){r.SetIsSuccess(false);r.SetMessage(ex.Message);}return r;}
+        public async Task<Result<Article>> Update(Article item){var r=new Result<Article>();try{var db=await _dbContext.Articles.FirstOrDefaultAsync(x=>x.Id==item.Id);if(db==null){r.SetIsSuccess(false);r.SetMessage("Kayıt bulunamadı.");return r;}db.FileId=item.FileId;db.Header=item.Header;db.HeaderEn=item.HeaderEn;db.SubHeader=item.SubHeader;db.SubHeaderEn=item.SubHeaderEn;db.Content=item.Content;db.ContentEn=item.ContentEn;await _dbContext.SaveChangesAsync();r.SetData(db);r.SetMessage("İşlem başarı ile gerçekleşti.");}catch(Exception ex){r.SetIsSuccess(false);r.SetMessage(ex.Message);}return r;}
+        public async Task<Result<Article>> Delete(long id){var r=new Result<Article>();try{var db=await _dbContext.Articles.FirstOrDefaultAsync(x=>x.Id==id);if(db==null){r.SetIsSuccess(false);r.SetMessage("Kayıt bulunamadı.");return r;}db.IsDeleted=true;await _dbContext.SaveChangesAsync();r.SetData(db);r.SetMessage("İşlem başarı ile gerçekleşti.");}catch(Exception ex){r.SetIsSuccess(false);r.SetMessage(ex.Message);}return r;}
+
         private async Task<Model.File> GetFile(long id, string token)
         {
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
-            var response = await client.GetAsync(_configuration["AppSettings:ApiUrl"] + "/api/File/" + id);
+            var fileUrl = _configuration["AppSettings:ApiUrl"] + "/api/File/" + id;
+            var response = await client.GetAsync(fileUrl);
 
             if (response.IsSuccessStatusCode)
             {

@@ -1,0 +1,1 @@
+using DashboardManagement.Model; namespace DashboardManagement.Interfaces { public interface IDashboardService { Task<Result<DashboardResponse>> Get(DateTime? startDate,DateTime? endDate,string? authorization); } }

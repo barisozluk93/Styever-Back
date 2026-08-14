@@ -15,6 +15,12 @@ namespace ReportContentManagement.Controllers
             _reportContentService = reportContentService;
         }
 
+        [HttpGet("DashboardStats")]
+        public async Task<IActionResult> DashboardStats()
+        {
+            return new OkObjectResult(await _reportContentService.GetDashboardStats());
+        }
+
         [HttpPost("Save")]
         public async Task<IActionResult> Save([FromBody] ReportContent reportContent)
         {

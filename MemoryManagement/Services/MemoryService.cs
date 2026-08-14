@@ -1,4 +1,4 @@
-﻿using MemoryManagement.DbContexts;
+using MemoryManagement.DbContexts;
 using MemoryManagement.Entity;
 using MemoryManagement.Interfaces;
 using MemoryManagement.Model;
@@ -46,6 +46,98 @@ namespace MemoryManagement.Services
                 {
                     transaction.Rollback();
                 }
+            }
+
+            return result;
+        }
+
+        public async Task<Result<DashboardMemoryStats>> GetDashboardStats(DateTime? startDate, DateTime? endDate)
+        {
+            var result = new Result<DashboardMemoryStats>();
+            try
+            {
+                TimeZoneInfo istanbulTimeZone;
+                try
+                {
+                    istanbulTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Istanbul");
+                }
+                catch (TimeZoneNotFoundException)
+                {
+                    istanbulTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
+                }
+
+                DateTime ToUtcBoundary(DateTime value)
+                {
+                    var localDate = DateTime.SpecifyKind(value.Date, DateTimeKind.Unspecified);
+                    return TimeZoneInfo.ConvertTimeToUtc(localDate, istanbulTimeZone);
+                }
+
+                DateTime ToIstanbulTime(DateTime value)
+                {
+                    var utc = value.Kind switch
+                    {
+                        DateTimeKind.Utc => value,
+                        DateTimeKind.Local => value.ToUniversalTime(),
+                        _ => DateTime.SpecifyKind(value, DateTimeKind.Utc)
+                    };
+                    return DateTime.SpecifyKind(
+                        TimeZoneInfo.ConvertTimeFromUtc(utc, istanbulTimeZone),
+                        DateTimeKind.Unspecified);
+                }
+
+                var endInput = endDate ?? TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, istanbulTimeZone);
+                var startInput = startDate ?? endInput.AddDays(-6);
+                var startUtc = ToUtcBoundary(startInput);
+                var endExclusiveUtc = ToUtcBoundary(endInput.Date.AddDays(1));
+
+                var q = _dbContext.Memories.AsNoTracking().Where(x => !x.IsDeleted);
+
+                var recentMemories = await q
+                    .Where(x => x.PostDate >= startUtc && x.PostDate < endExclusiveUtc)
+                    .OrderByDescending(x => x.PostDate)
+                    .Take(8)
+                    .Select(x => new
+                    {
+                        x.Name,
+                        x.UserId,
+                        x.PostDate
+                    })
+                    .ToListAsync();
+
+                var recentActivities = new List<DashboardRecentActivity>();
+                foreach (var memory in recentMemories)
+                {
+                    recentActivities.Add(new DashboardRecentActivity
+                    {
+                        Type = "memory",
+                        Name = memory.Name,
+                        ActorName = await GetUserName(memory.UserId),
+                        Date = ToIstanbulTime(memory.PostDate)
+                    });
+                }
+
+                var totalMemories = await q.CountAsync();
+                var totalLikes = await _dbContext.MemoryLikes.AsNoTracking().LongCountAsync(x => !x.IsDeleted);
+                var totalComments = await _dbContext.MemoryComments.AsNoTracking().LongCountAsync(x => !x.IsDeleted);
+                var totalCandles = await _dbContext.MemoryCandles.AsNoTracking().LongCountAsync(x => !x.IsDeleted);
+                var totalInteractions = totalLikes + totalComments + totalCandles;
+
+                result.SetData(new DashboardMemoryStats
+                {
+                    TotalMemories = totalMemories,
+                    PeriodMemories = await q.CountAsync(x => x.PostDate >= startUtc && x.PostDate < endExclusiveUtc),
+                    TotalLikes = totalLikes,
+                    TotalComments = totalComments,
+                    TotalCandles = totalCandles,
+                    AverageInteractionsPerMemory = totalMemories > 0 ? Math.Round((double)totalInteractions / totalMemories, 2) : 0,
+                    RecentActivities = recentActivities
+                });
+                result.SetMessage("İşlem başarı ile gerçekleşti.");
+            }
+            catch(Exception ex)
+            {
+                result.SetIsSuccess(false);
+                result.SetMessage(ex.Message);
             }
 
             return result;

@@ -1,4 +1,4 @@
-using MailKit.Net.Smtp;
+﻿using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -51,9 +51,27 @@ namespace UserManagement.Services
             {
                 try
                 {
-                    var queryable = _dbContext.Users
-                        .Where(x => (string.IsNullOrEmpty(lowerFilterText) || (x.Name.ToLower().Contains(lowerFilterText)) || x.Surname.ToLower().Contains(lowerFilterText)))
-                        .Select(s => new User()
+                    var queryable = _dbContext.Users.AsQueryable();
+
+                    if (!string.IsNullOrEmpty(lowerFilterText))
+                        queryable = queryable.Where(x => x.Name.ToLower().Contains(lowerFilterText) || x.Surname.ToLower().Contains(lowerFilterText) || x.Username.ToLower().Contains(lowerFilterText) || x.Email.ToLower().Contains(lowerFilterText));
+                    if (!string.IsNullOrWhiteSpace(pagingParameter.Name)) queryable = queryable.Where(x => x.Name.ToLower().Contains(pagingParameter.Name.ToLower()));
+                    if (!string.IsNullOrWhiteSpace(pagingParameter.NameSurname))
+                    {
+                        var nameSurname = pagingParameter.NameSurname.ToLower();
+                        queryable = queryable.Where(x => (x.Name + " " + x.Surname).ToLower().Contains(nameSurname));
+                    }
+                    if (!string.IsNullOrWhiteSpace(pagingParameter.Surname)) queryable = queryable.Where(x => x.Surname.ToLower().Contains(pagingParameter.Surname.ToLower()));
+                    if (!string.IsNullOrWhiteSpace(pagingParameter.Username)) queryable = queryable.Where(x => x.Username.ToLower().Contains(pagingParameter.Username.ToLower()));
+                    if (!string.IsNullOrWhiteSpace(pagingParameter.Email)) queryable = queryable.Where(x => x.Email.ToLower().Contains(pagingParameter.Email.ToLower()));
+                    if (!string.IsNullOrWhiteSpace(pagingParameter.Phone)) queryable = queryable.Where(x => x.Phone.ToLower().Contains(pagingParameter.Phone.ToLower()));
+                    if (pagingParameter.IsDeleted.HasValue) queryable = queryable.Where(x => x.IsDeleted == pagingParameter.IsDeleted.Value);
+                    if (pagingParameter.IsActive.HasValue) queryable = queryable.Where(x => x.IsActive == pagingParameter.IsActive.Value);
+                    if (pagingParameter.CreatedDateFrom.HasValue) queryable = queryable.Where(x => x.CreatedDate >= pagingParameter.CreatedDateFrom.Value);
+                    if (pagingParameter.CreatedDateTo.HasValue) queryable = queryable.Where(x => x.CreatedDate < pagingParameter.CreatedDateTo.Value.Date.AddDays(1));
+                    if (pagingParameter.RoleId.HasValue) queryable = queryable.Where(x => _dbContext.UserRoles.Any(r => !r.IsDeleted && r.UserId == x.Id && r.RoleId == pagingParameter.RoleId.Value));
+
+                    queryable = queryable.Select(s => new User()
                     {
                         Id = s.Id,
                         Name = s.Name,
@@ -63,6 +81,7 @@ namespace UserManagement.Services
                         Email = s.Email,
                         Phone = s.Phone,
                         IsSystemData = s.IsSystemData,
+                        IsActive = s.IsActive,
                         Permissions = _dbContext.UserPermissions.Include(p => p.Permission).Where(x => !x.IsDeleted && x.UserId == s.Id).Select(p => p.Permission).ToList(),
                         Roles = _dbContext.UserRoles.Where(x => !x.IsDeleted && x.UserId == s.Id).Select(p => p.RoleId).ToList(),
                     });
@@ -119,7 +138,9 @@ namespace UserManagement.Services
 
                         UserPayment payment = new UserPayment();
                         payment.UserId = userId;
-                        payment.Price = planId == 2 ? 499.00 : planId == 3 ? 659.00 : 1299.00;
+                        var selectedPlan = await _dbContext.Plans.AsNoTracking().FirstOrDefaultAsync(x => x.Id == planId && !x.IsDeleted);
+                        if (selectedPlan == null) throw new InvalidOperationException("Seçilen paket bulunamadı.");
+                        payment.Price = selectedPlan.Price;
                         payment.PlanId = planId;
                         payment.PaymentDate = DateTime.UtcNow;
                         payment.IsDeleted = false;
@@ -412,6 +433,15 @@ Styever Ekibi";
             {
                 try
                 {
+                    var selectedPlan = await _dbContext.Plans
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(x => x.Id == userVoucher.PlanId && !x.IsDeleted);
+
+                    if (selectedPlan == null)
+                        throw new InvalidOperationException("Seçilen paket bulunamadı.");
+
+                    // Fiyat istemciden güvenilmez; her zaman Plan tablosundaki güncel fiyat kullanılır.
+                    userVoucher.Price = selectedPlan.Price;
                     userVoucher.Date = DateTime.UtcNow;
                     userVoucher.Voucher = Guid.NewGuid();
                     userVoucher.IsDeleted = false;
@@ -461,7 +491,9 @@ Styever Ekibi";
 
                         UserPayment payment = new UserPayment();
                         payment.UserId = userId;
-                        payment.Price = user.Roles.First() == 2 ? 499.00 : user.Roles.First() == 3 ? 6999.00 : 1299.00;
+                        var selectedPlan = await _dbContext.Plans.AsNoTracking().FirstOrDefaultAsync(x => x.Id == user.Roles.First() && !x.IsDeleted);
+                        if (selectedPlan == null) throw new InvalidOperationException("Kullanıcının paketi bulunamadı.");
+                        payment.Price = selectedPlan.Price;
                         payment.PlanId = user.Roles.First();
                         payment.PaymentDate = DateTime.UtcNow;
                         payment.IsDeleted = false;
@@ -487,6 +519,250 @@ Styever Ekibi";
                     result.SetIsSuccess(false);
                     result.SetMessage(exception.Message);
                 }
+            }
+
+            return result;
+        }
+
+        public async Task<Result<DashboardUserStats>> GetDashboardStats(DateTime? startDate, DateTime? endDate)
+        {
+            var result = new Result<DashboardUserStats>();
+            try
+            {
+                TimeZoneInfo istanbulTimeZone;
+                try
+                {
+                    istanbulTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Istanbul");
+                }
+                catch (TimeZoneNotFoundException)
+                {
+                    istanbulTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Turkey Standard Time");
+                }
+
+                DateTime ToUtcBoundary(DateTime value)
+                {
+                    var localDate = DateTime.SpecifyKind(value.Date, DateTimeKind.Unspecified);
+                    return TimeZoneInfo.ConvertTimeToUtc(localDate, istanbulTimeZone);
+                }
+
+                DateTime ToIstanbulTime(DateTime value)
+                {
+                    var utc = value.Kind switch
+                    {
+                        DateTimeKind.Utc => value,
+                        DateTimeKind.Local => value.ToUniversalTime(),
+                        _ => DateTime.SpecifyKind(value, DateTimeKind.Utc)
+                    };
+                    return DateTime.SpecifyKind(
+                        TimeZoneInfo.ConvertTimeFromUtc(utc, istanbulTimeZone),
+                        DateTimeKind.Unspecified);
+                }
+
+                var endInput = endDate ?? TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, istanbulTimeZone);
+                var startInput = startDate ?? endInput.AddDays(-6);
+
+                // Dashboard tarihleri Türkiye takvim günü olarak değerlendirilir.
+                // Örn. 13.08 00:00 +03, UTC'de 12.08 21:00 olsa bile 13 Ağustos gelirine yazılır.
+                var startUtc = ToUtcBoundary(startInput);
+                var endExclusiveUtc = ToUtcBoundary(endInput.Date.AddDays(1));
+                var startCalendarDate = startInput.Date;
+                var endCalendarDate = endInput.Date;
+
+                // Üst özet ve paket kartları global metriklerdir; tarih filtresinden etkilenmez.
+                // Dönem filtresi yalnızca trend, gelir analizi ve son hareketler için kullanılır.
+                var allUsers = _dbContext.Users.AsNoTracking()
+                    .Where(x => !x.IsDeleted && x.Id > 4);
+
+                var users = allUsers
+                    .Where(x => x.CreatedDate >= startUtc && x.CreatedDate < endExclusiveUtc);
+
+                var allRoleQuery =
+                    from userRole in _dbContext.UserRoles.AsNoTracking()
+                    join user in allUsers on userRole.UserId equals user.Id
+                    where !userRole.IsDeleted
+                    select userRole;
+
+                var allPayments = _dbContext.UserPayments.AsNoTracking()
+                    .Where(x => !x.IsDeleted);
+                // UserVoucher.IsDeleted voucher kullanıldığında true yapılıyor. Bu bir satış iptali değildir;
+                // sadece voucher'ın tekrar kullanılmasını engeller. Dashboard gelir/hediye metrikleri
+                // satın alınmış gift kayıtlarını kullanım durumundan bağımsız olarak korumalıdır.
+                var allGifts = _dbContext.UserVouchers.AsNoTracking();
+
+                var payments = allPayments
+                    .Where(x => x.PaymentDate >= startUtc && x.PaymentDate < endExclusiveUtc);
+                var gifts = allGifts
+                    .Where(x => x.Date >= startUtc && x.Date < endExclusiveUtc);
+
+                var totalUsers = await allUsers.CountAsync();
+
+                // Kayıt kaynağı dağılımı globaldir. RegisterWithVoucher akışında
+                // UserVoucher.IsDeleted=true olması voucher'ın kullanıldığını ve bu voucher ile
+                // sisteme bir kayıt yapıldığını gösterir. ReceiverEmail ile kullanıcı mailinin
+                // aynı olması gerekmez; bu nedenle doğrudan kullanılmış voucher sayısını baz alıyoruz.
+                var usedVoucherCount = await _dbContext.UserVouchers
+                    .AsNoTracking()
+                    .LongCountAsync(x => x.IsDeleted);
+
+                // Veri tutarsızlığı durumunda dağılımın toplam kullanıcı sayısını aşmaması için sınırla.
+                var giftVoucherUsers = Math.Min(totalUsers, usedVoucherCount);
+                var regularUsers = Math.Max(0, totalUsers - giftVoucherUsers);
+
+                var stats = new DashboardUserStats
+                {
+                    TotalUsers = totalUsers,
+                    ActiveMembers = await allUsers.CountAsync(x => x.IsActive),
+                    OriginUsers = await allRoleQuery.CountAsync(x => x.RoleId == 2),
+                    HeartUsers = await allRoleQuery.CountAsync(x => x.RoleId == 3),
+                    FamilyUsers = await allRoleQuery.CountAsync(x => x.RoleId == 4),
+                    // Bu alanlar üstteki global özet kartlarında kullanılır.
+                    // Dönemsel gelir kırılımı frontend'de filtrelenmiş Trend toplamlarından hesaplanır.
+                    MembershipRevenue = await allPayments.SumAsync(x => (double?)x.Price) ?? 0,
+                    GiftRevenue = await allGifts.SumAsync(x => (double?)x.Price) ?? 0,
+                    TotalGifts = await allGifts.CountAsync(),
+                    GiftVoucherUsers = giftVoucherUsers,
+                    RegularUsers = regularUsers,
+                    ExpiredTrialUsers = await allUsers.LongCountAsync(x => x.IsTrial && !x.IsActive && x.TrialExpirationDate <= DateTime.UtcNow),
+                    ExpiredPackageUsers = await allUsers.LongCountAsync(x => x.ExpirationDate <= DateTime.UtcNow && !x.IsTrial)
+                };
+
+                // PostgreSQL timestamptz UTC instant saklar. Günlük gruplama DB'deki UTC .Date ile
+                // değil, Türkiye saatine çevrildikten sonra yapılır; aksi halde 00:00 +03 kayıtları
+                // bir önceki güne düşer.
+                var userDates = await users
+                    .Where(x => x.CreatedDate >= startUtc && x.CreatedDate < endExclusiveUtc)
+                    .Select(x => x.CreatedDate)
+                    .ToListAsync();
+
+                var paymentRows = await payments
+                    .Select(x => new { x.PaymentDate, x.Price })
+                    .ToListAsync();
+
+                var giftRows = await gifts
+                    .Select(x => new { x.Date, x.Price })
+                    .ToListAsync();
+
+                var userDaily = userDates
+                    .GroupBy(x => ToIstanbulTime(x).Date)
+                    .ToDictionary(g => g.Key, g => (long)g.Count());
+
+                var paymentDaily = paymentRows
+                    .GroupBy(x => ToIstanbulTime(x.PaymentDate).Date)
+                    .ToDictionary(g => g.Key, g => g.Sum(x => x.Price));
+
+                var giftDaily = giftRows
+                    .GroupBy(x => ToIstanbulTime(x.Date).Date)
+                    .ToDictionary(g => g.Key, g => g.Sum(x => x.Price));
+
+                for (var day = startCalendarDate; day <= endCalendarDate; day = day.AddDays(1))
+                {
+                    stats.Trend.Add(new DashboardTrendPoint
+                    {
+                        Date = DateTime.SpecifyKind(day, DateTimeKind.Unspecified),
+                        NewUsers = userDaily.TryGetValue(day, out var userCount) ? userCount : 0,
+                        MembershipRevenue = paymentDaily.TryGetValue(day, out var membershipRevenue) ? membershipRevenue : 0,
+                        GiftRevenue = giftDaily.TryGetValue(day, out var giftRevenue) ? giftRevenue : 0
+                    });
+                }
+
+                var recentUsers = (await users
+                    .Where(x => x.CreatedDate >= startUtc && x.CreatedDate < endExclusiveUtc)
+                    .OrderByDescending(x => x.CreatedDate)
+                    .Take(8)
+                    .Select(x => new
+                    {
+                        x.Name,
+                        x.Surname,
+                        x.CreatedDate
+                    })
+                    .ToListAsync())
+                    .Select(x => new DashboardRecentActivity
+                    {
+                        Type = "user",
+                        Name = (x.Name + " " + x.Surname).Trim(),
+                        ActorName = (x.Name + " " + x.Surname).Trim(),
+                        Date = ToIstanbulTime(x.CreatedDate)
+                    })
+                    .ToList();
+
+                var recentPayments = (await payments
+                    .Include(x => x.User)
+                    .OrderByDescending(x => x.PaymentDate)
+                    .Take(8)
+                    .ToListAsync())
+                    .Select(x => new DashboardRecentActivity
+                    {
+                        Type = "payment",
+                        Name = x.User == null ? null : (x.User.Name + " " + x.User.Surname).Trim(),
+                        ActorName = x.User == null ? null : (x.User.Name + " " + x.User.Surname).Trim(),
+                        Amount = x.Price,
+                        Date = ToIstanbulTime(x.PaymentDate)
+                    })
+                    .ToList();
+
+                var recentGiftRows = await gifts
+                    .Include(x => x.User)
+                    .OrderByDescending(x => x.Date)
+                    .Take(8)
+                    .ToListAsync();
+
+                var senderEmails = recentGiftRows
+                    .Where(x => x.User == null && !string.IsNullOrWhiteSpace(x.SenderEmail))
+                    .Select(x => x.SenderEmail!)
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                var senderUsers = senderEmails.Count == 0
+                    ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    : (await _dbContext.Users.AsNoTracking()
+                        .Where(x => senderEmails.Contains(x.Email))
+                        .Select(x => new { x.Email, x.Name, x.Surname })
+                        .ToListAsync())
+                        .GroupBy(x => x.Email, StringComparer.OrdinalIgnoreCase)
+                        .ToDictionary(
+                            g => g.Key,
+                            g => (g.First().Name + " " + g.First().Surname).Trim(),
+                            StringComparer.OrdinalIgnoreCase);
+
+                var recentGifts = recentGiftRows
+                    .Select(x =>
+                    {
+                        string? actorName = null;
+                        if (x.User != null)
+                        {
+                            actorName = (x.User.Name + " " + x.User.Surname).Trim();
+                        }
+                        else if (!string.IsNullOrWhiteSpace(x.SenderEmail) && senderUsers.TryGetValue(x.SenderEmail, out var senderName))
+                        {
+                            actorName = senderName;
+                        }
+
+                        return new DashboardRecentActivity
+                        {
+                            Type = "gift",
+                            // Alıcı maili Recent Activities'te gösterilmez.
+                            Name = null,
+                            ActorName = actorName,
+                            Amount = x.Price,
+                            Date = ToIstanbulTime(x.Date)
+                        };
+                    })
+                    .ToList();
+
+                stats.RecentActivities = recentUsers
+                    .Concat(recentPayments)
+                    .Concat(recentGifts)
+                    .OrderByDescending(x => x.Date)
+                    .Take(8)
+                    .ToList();
+
+                result.SetData(stats);
+                result.SetMessage("İşlem başarı ile gerçekleşti.");
+            }
+            catch (Exception ex)
+            {
+                result.SetIsSuccess(false);
+                result.SetMessage(ex.Message);
             }
 
             return result;
@@ -685,6 +961,7 @@ Styever Ekibi";
                     if (oldUser != null)
                     {
                         oldUser.IsDeleted = true;
+                        oldUser.IsActive = false;
 
                         var roles = await _dbContext.UserRoles.Where(x => x.UserId == oldUser.Id).ToListAsync();
                         _dbContext.UserRoles.RemoveRange(roles);

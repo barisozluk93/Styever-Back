@@ -19,7 +19,7 @@ namespace ArticleManagement.DbContexts
             modelBuilder.Entity<Article>().HasData(
                 new Article {
                     Id = 1,
-                    FileId = 7,
+                    FileId = 4,
                     Header = "Sevilen Bir Evcil Hayvanı Kaybetmenin Acısıyla Başa Çıkmak",
                     HeaderEn = "Coping With The Grief of Losing a Beloved Pet",
                     SubHeader = "Evcil hayvanınızı kaybetmenin acısıyla başa çıkmak için destekleyici iyileşme ipuçlarıyla dolu şefkatli bir rehber.",
@@ -46,7 +46,7 @@ namespace ArticleManagement.DbContexts
                 new Article
                 {
                     Id = 2,
-                    FileId = 8,
+                    FileId = 5,
                     Header = "Çocukların Evcil Hayvan Kaybını Anlamasına ve İşlemesine Yardımcı Olmak",
                     HeaderEn = "Helping Children Understand and Process Pet Loss",
                     SubHeader = "Dürüst konuşmalar, destek ve anlamlı anma yoluyla çocukların evcil hayvan kaybıyla başa çıkmalarına yardımcı olmak için nazik bir rehber.",
@@ -83,7 +83,7 @@ namespace ArticleManagement.DbContexts
                 new Article
                 {
                     Id = 3,
-                    FileId = 9,
+                    FileId = 6,
                     Header = "Başka Bir Evcil Hayvan Sahiplenmek İçin Doğru Zaman Ne Zaman?",
                     HeaderEn = "When Is The Right Time to Get Another Pet?",
                     SubHeader = "Yeni bir evcil hayvan edinmeye hazır olduğunuz zamanı anlamanıza yardımcı olacak, yas tutma, iyileşme ve geçmiş dostunuza saygı duyma konularında tavsiyeler içeren bir rehber.",

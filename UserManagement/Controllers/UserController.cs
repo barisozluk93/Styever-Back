@@ -36,6 +36,14 @@ namespace UserManagement.Controllers
             return new OkObjectResult(result);
         }
 
+        [HttpGet("DashboardStats")]
+        [Authorize]
+        [HasPermission("UserScene.Paging.Permission")]
+        public async Task<IActionResult> DashboardStats([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
+        {
+            return new OkObjectResult(await _userService.GetDashboardStats(startDate, endDate));
+        }
+
         [HttpGet("All")]
         [Authorize]
         [HasPermission("UserScene.List.Permission")]

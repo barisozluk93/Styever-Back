@@ -19,39 +19,37 @@ namespace UserManagement.Services
         public async Task<Result<PagingResult<PagedList<Role>>>> Paginate(PagingParameter pagingParameter)
         {
             var result = new Result<PagingResult<PagedList<Role>>>();
-
-            string lowerFilterText = string.IsNullOrEmpty(pagingParameter.FilterText) ? null : pagingParameter.FilterText.ToLower();
-
-            using (var transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadUncommitted))
+            try
             {
-                try
+                var queryable = _dbContext.Roles.AsNoTracking().AsQueryable();
+                if (!string.IsNullOrWhiteSpace(pagingParameter.FilterText))
                 {
-                    var queryable = _dbContext.Roles.Where(x=> (String.IsNullOrEmpty(lowerFilterText) || (x.Name.ToLower().Contains(lowerFilterText)))).Select(s => new Role()
-                    {
-                        Id = s.Id,
-                        Name = s.Name,
-                        IsDeleted = s.IsDeleted,
-                        IsSystemData = s.IsSystemData,
-                        Permissions = _dbContext.RolePermissions.Where(x => !x.IsDeleted && x.RoleId == s.Id).Select(p => p.PermissionId).ToList()
-                    });
-
-                    var pagination = PagedList<Role>.ToPagedList(queryable, pagingParameter.PageNumber, pagingParameter.PageSize);
-
-                    result.SetData(new PagingResult<PagedList<Role>>()
-                    {
-                        Items = pagination,
-                        TotalCount = pagination.TotalCount,
-                    });
-
-                    result.SetMessage("İşlem başarı ile gerçekleşti.");
+                    var filter = pagingParameter.FilterText.ToLower();
+                    queryable = queryable.Where(x => x.Name.ToLower().Contains(filter));
                 }
-                catch (Exception ex)
+                if (!string.IsNullOrWhiteSpace(pagingParameter.Name))
+                    queryable = queryable.Where(x => x.Name.ToLower().Contains(pagingParameter.Name.ToLower()));
+                if (pagingParameter.IsDeleted.HasValue)
+                    queryable = queryable.Where(x => x.IsDeleted == pagingParameter.IsDeleted.Value);
+
+                var projected = queryable.OrderByDescending(x => x.Id).Select(s => new Role()
                 {
-                    result.SetIsSuccess(false);
-                    result.SetMessage(ex.Message);
-                }
+                    Id = s.Id,
+                    Name = s.Name,
+                    IsDeleted = s.IsDeleted,
+                    IsSystemData = s.IsSystemData,
+                    Permissions = _dbContext.RolePermissions.Where(x => !x.IsDeleted && x.RoleId == s.Id).Select(rp => rp.PermissionId).ToList()
+                });
+
+                var pagination = PagedList<Role>.ToPagedList(projected, pagingParameter.PageNumber, pagingParameter.PageSize);
+                result.SetData(new PagingResult<PagedList<Role>>() { Items = pagination, TotalCount = pagination.TotalCount });
+                result.SetMessage("İşlem başarı ile gerçekleşti.");
             }
-
+            catch (Exception ex)
+            {
+                result.SetIsSuccess(false);
+                result.SetMessage(ex.Message);
+            }
             return result;
         }
         public async Task<Result<List<Role>>> GetRoles()

@@ -1,13 +1,1 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ArticleManagement.Entity;
-using ArticleManagement.Model;
-
-namespace ArticleManagement.Interfaces
-{
-    public interface IArticleService
-    {
-        Task<Result<Article>> GetById(long id, string token);
-        Task<Result<List<Article>>> GetAll(string searchTerm, string language, string token);
-
-    }
-}
+using ArticleManagement.Entity; using ArticleManagement.Model; namespace ArticleManagement.Interfaces { public interface IArticleService { Task<Result<Article>> GetById(long id,string token); Task<Result<List<Article>>> GetAll(string filterText, string language,string token); Task<Result<PagingResult<PagedList<Article>>>> Paginate(PagingParameter p, string token); Task<Result<Article>> Save(Article item); Task<Result<Article>> Update(Article item); Task<Result<Article>> Delete(long id); } }

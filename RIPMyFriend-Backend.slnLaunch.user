@@ -46,6 +46,11 @@
         "Path": "ReportContentManagement\\ReportContentManagement.csproj",
         "Action": "Start",
         "DebugTarget": "http"
+      },
+      {
+        "Path": "DashboardManagement\\DashboardManagement.csproj",
+        "Action": "Start",
+        "DebugTarget": "http"
       }
     ]
   }

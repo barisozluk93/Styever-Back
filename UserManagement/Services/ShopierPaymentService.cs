@@ -120,6 +120,16 @@ namespace UserManagement.Services
                 return Fail(result, "Hediye paketi için Shopier ürün eşleştirmesi bulunamadı.");
             }
 
+            var selectedPlan = await _db.Plans
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == voucher.PlanId && !x.IsDeleted);
+
+            if (selectedPlan == null)
+                return Fail(result, "Seçilen hediye paketi bulunamadı.");
+
+            // Gift payload fiyatı da DB'deki plan fiyatından üretilir.
+            voucher.Price = selectedPlan.Price;
+
             // Guest istemciler eski sürümlerde UserId=0 gönderebilir.
             // 0 ve negatif değerleri guest olarak normalize ediyoruz.
             long? giftUserId = voucher.UserId.HasValue && voucher.UserId.Value > 0
